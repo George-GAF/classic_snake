@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "587622109093",
+    "project_id": "classic-snake-3ecd5",
+    "storage_bucket": "classic-snake-3ecd5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587622109093:android:d2728c8df989658394e24c",
+        "android_client_info": {
+          "package_name": "com.gaf.classic_snake"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587622109093-tl6bhropabtc3i0ol00ske57mi6fobij.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMy1wK9fqVGEDLNlXiAtKl2IYykXqWbGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587622109093-tl6bhropabtc3i0ol00ske57mi6fobij.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
