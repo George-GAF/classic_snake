@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../viewmodel/manager.dart';
+import '../view_model/manager.dart';
 import 'play_screen.dart';
 
 class LoadingScreen extends StatefulWidget {

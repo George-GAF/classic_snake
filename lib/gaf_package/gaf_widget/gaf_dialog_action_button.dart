@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../viewmodel/game_size.dart';
+import '../../view_model/game_size.dart';
 import '../../widget/gaf_text.dart';
 
 class GAFActionButton extends StatelessWidget {

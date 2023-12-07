@@ -5,20 +5,18 @@ import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/level_model.dart';
+
 //TODO : need to test : because some error note i get
 class LevelController {
   final int rank;
+  LevelController(this.rank);
+
   final String _levelState = 'stage_state';
   final String _levelHighScore = 'stage_high_score';
-
   final String _levelBlocksIndex = 'blocks_list';
   final String _levelTarget = 'level_target';
 
   static List<int> customBlocks = [];
-
-  bool _playHighScoreSound = false;
-
-  LevelController(this.rank);
 
   bool scoreLevelDone(int target, int current) {
     bool scoreDone = current >= target;
@@ -28,18 +26,11 @@ class LevelController {
     return scoreDone;
   }
 
-  Future<bool> highScoreBroken(Future<int> highScore, int current ) async {
-    //log("hi score run $_playHighScoreSound");
-    int h = await highScore;
+  Future<bool> highScoreBroken(int current) async {
+    int h = await getLevelHighScore();
     if (current >= h && current != 0) {
       setLevelHighScore(current);
-      //if (!_playHighScoreSound) {
-        //GameSound.playSoundEffect(KHeightScoreBreakFileSound);
-        //_playHighScoreSound = true;
-      //}
     }
-    //log("hi score run after change $_playHighScoreSound");
-    log("from level controller current : $current high score $h");
     return current > h;
   }
 

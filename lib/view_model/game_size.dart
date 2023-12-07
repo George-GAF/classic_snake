@@ -1,6 +1,12 @@
-import 'dart:developer';
-
 class GameSize {
+  GameSize._();
+
+  static final GameSize _instance = GameSize._();
+
+  factory GameSize() {
+    return _instance;
+  }
+
   static bool isGameBuild = false;
   static bool isWideScreen = false;
   static late double _width;
@@ -17,26 +23,15 @@ class GameSize {
   static double _sideMargin = 0;
   //static const double _per = .5625;
 
-  GameSize._();
-
-  static final GameSize _instance = GameSize._();
-
-  factory GameSize() {
-
-    return _instance;
-  }
-
   void calcGameSize(double width, double height) {
-    int temp = (width ~/10) *10 ;
-    log("new wi : $temp");
     _width = width > height ? height : width;
     _height = height > width ? height : width;
-    _cellSize = _width ~/ _cellInRow ;
+    _cellSize = _width ~/ _cellInRow;
     _sideMargin = _width - (_cellSize * _cellInRow);
 
-    log("width : $_width\nheight : $_height\nCell Size : $_cellSize");
-    log("Side Space : $_sideMargin");
-    log("stage H ${getStageHeight()}");
+    //log("width : $_width\nheight : $_height\nCell Size : $_cellSize");
+    //log("Side Space : $_sideMargin");
+    //log("stage H ${getStageHeight()}");
   }
 
   double width() {
@@ -49,6 +44,10 @@ class GameSize {
 
   int cellSize() {
     return _cellSize;
+  }
+
+  double rowHeight() {
+    return GameSize().height() - (GameSize().getStageHeight());
   }
 
   /*
@@ -74,7 +73,7 @@ class GameSize {
     return _boxCount - _cellInRow;
   }
 
-  int cellInRow(){
+  int cellInRow() {
     return _cellInRow;
   }
 
@@ -89,7 +88,7 @@ class GameSize {
   static int boxCount() {
     return _boxCount;
   }
-
+/*
   static void getWellIndex(
       {bool top = false,
       bool right = false,
@@ -115,5 +114,5 @@ class GameSize {
     }
     blockIndex.addAll(well);
     blockIndex.addAll(block);
-  }
+  }*/
 }

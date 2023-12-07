@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:classic_snake/constant/game_values.dart';
 import 'package:flutter/foundation.dart';
 
 import '../constant/constant.dart';
@@ -47,11 +48,11 @@ class SpecialFood extends ChangeNotifier {
     Future.delayed(Duration(seconds: Manager.seconds), () {
       _reward = '';
       immortal = false;
-      Manager.giftFood = [];
+      Manager.giftFoods = [];
       // Manager.bonus = 0;
       Manager.seconds = 0;
-      if (Manager.gameSpeed != Manager.defaultLevelGameSpeed) {
-        PlayScreen.assManager.changeGameSpeed(Manager.defaultLevelGameSpeed);
+      if (Manager.gameSpeed != KDefaultGameSpeed) {
+        Manager.changeGameSpeed(KDefaultGameSpeed);
       }
       if (Manager.isMustChangeSnakeColor)
         Manager.isMustChangeSnakeColor = false;
@@ -97,16 +98,14 @@ class SpecialFood extends ChangeNotifier {
 
   String _increaseSpeed() {
     Manager.seconds = 55;
-    PlayScreen.assManager.changeGameSpeed(
-        Manager.defaultLevelGameSpeed - (Random().nextInt(50) + 40));
+    Manager.changeGameSpeed(KDefaultGameSpeed - (Random().nextInt(50) + 40));
     GameSound.playSoundEffect(KBadLuckFileSound);
     return 'Increase Speed';
   }
 
   String _decreaseSpeed() {
     Manager.seconds = 55;
-    PlayScreen.assManager.changeGameSpeed(
-        Manager.defaultLevelGameSpeed + (Random().nextInt(50) + 40));
+    Manager.changeGameSpeed(KDefaultGameSpeed + (Random().nextInt(50) + 40));
     GameSound.playSoundEffect(KGoodLuckFileSound);
     return 'Decrease Speed';
   }
@@ -127,18 +126,21 @@ class CreateGiftFoodIndex {
       while (!_isValueOk(value)) {
         value = Random().nextInt(GameSize.boxCount());
       }
-      Manager.giftFood.add(value);
+      Manager.giftFoods.add(value);
     }
   }
 
   bool _isValueOk(int value) {
-    if (Manager.giftFood.contains(value))
-      return false;
+    if (Manager.giftFoods.contains(value) ||
+        Manager.snake.contains(value) ||
+        value == Manager.food) return false;
+
+    /*
     else if (GameSize.blockIndex.contains(value))
       return false;
-    else if (Manager.snakeIndex.contains(value))
+    else if (Manager.snakeBody.contains(value))
       return false;
-    else if (Manager.snakeFood == value) return false;
+    else if (Manager.snakeFood == value) return false;*/
     return true;
   }
 }

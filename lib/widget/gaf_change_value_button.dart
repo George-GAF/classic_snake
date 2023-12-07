@@ -1,10 +1,10 @@
-import 'package:classic_snake/viewmodel/app_color.dart';
-import 'package:classic_snake/viewmodel/game_size.dart';
+import 'package:classic_snake/view_model/app_color.dart';
+import 'package:classic_snake/view_model/game_size.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constant/constant.dart';
-import '../viewmodel/sound_controller.dart';
+import '../view_model/sound_controller.dart';
 
 class GAFChangeValueButton extends StatelessWidget {
   final Function? onStart;

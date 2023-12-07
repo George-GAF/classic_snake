@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../viewmodel/app_color.dart';
+import '../../view_model/app_color.dart';
 import '../../widget/gaf_text.dart';
 
 class GAFDialog extends StatelessWidget {

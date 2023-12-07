@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../model/level_model.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/manager.dart';
+import '../view_model/app_color.dart';
+import '../view_model/manager.dart';
 import '../widget/gaf_back_button.dart';
 import '../widget/gaf_text.dart';
 import '../widget/main_menu_button.dart';

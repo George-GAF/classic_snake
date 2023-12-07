@@ -8,11 +8,11 @@ class GameTimer {
   static bool _timerRun = false;
 
   static void runTimer() {
-    GameTimer.manageTimer();
+    manageTimer();
   }
 
   static String showTimer() {
-    return GameTimer.timerText;
+    return timerText;
   }
 
   static void manageTimer() {

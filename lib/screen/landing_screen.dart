@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../viewmodel/level_controller.dart';
-import '../viewmodel/manager.dart';
+import '../view_model/level_controller.dart';
+import '../view_model/manager.dart';
 import 'menu_screen.dart';
 
 class LandingScreen extends StatefulWidget {

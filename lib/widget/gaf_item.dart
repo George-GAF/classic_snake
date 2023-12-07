@@ -1,5 +1,5 @@
-import 'package:classic_snake/viewmodel/app_color.dart';
-import 'package:classic_snake/viewmodel/game_size.dart';
+import 'package:classic_snake/view_model/app_color.dart';
+import 'package:classic_snake/view_model/game_size.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

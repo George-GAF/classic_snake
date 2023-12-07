@@ -1,9 +1,10 @@
 import 'dart:developer';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:classic_snake/constant/constant.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../constant/constant.dart';
 
 class GameSound extends ChangeNotifier {
   static bool musicON = true;

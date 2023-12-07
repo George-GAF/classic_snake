@@ -1,11 +1,11 @@
+import 'package:classic_snake/providers/stagePlay.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constant/enum_file.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/manager.dart';
-import '../viewmodel/snake.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/manager.dart';
 import 'snake_corner.dart';
 import 'snake_eye.dart';
 
@@ -53,7 +53,9 @@ class CellProperties {
   late  List<BoxShadow>? listBoxShadow;
   Widget child = SizedBox();
 
+
   CellProperties(this.cellType, this.context, this.i) {
+    final stage= Provider.of<StagePlay>(context);
     bool isCorner = false;
     padding = EdgeInsets.all(0);
     margin = cellType == CellType.Food || cellType == CellType.GiftFood
@@ -77,31 +79,31 @@ class CellProperties {
       if (Manager.isMustChangeSnakeColor) {
         color = Provider.of<AppColorController>(context).getColors().fontShadow;
       }
-      if (Provider.of<Snake>(context).snakeDetail == CellType.Head) {
+      if (Provider.of<StagePlay>(context).cellType == CellType.Head) {
         borderRadius = BorderRadius.circular(_cellSize / 2);
         double headM = _cellSize * .08;
-        if (Provider.of<Snake>(context).direct == Direct.Up) {
+        if (Provider.of<StagePlay>(context).getDirect() == Direct.Up) {
           child = Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [SnakeEye(w: .01, h: .015), SnakeEye(w: .01, h: .015)],
           );
           padding = EdgeInsets.only(top: _height * .005);
           margin = EdgeInsets.symmetric(horizontal: headM);
-        } else if (Provider.of<Snake>(context).direct == Direct.Right) {
+        } else if (Provider.of<StagePlay>(context).getDirect() == Direct.Right) {
           child = Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [SnakeEye(w: .015, h: .01), SnakeEye(w: .015, h: .01)],
           );
           padding = EdgeInsets.only(right: _width * .006);
           margin = EdgeInsets.symmetric(vertical: headM);
-        } else if (Provider.of<Snake>(context).direct == Direct.Left) {
+        } else if (Provider.of<StagePlay>(context).getDirect() == Direct.Left) {
           child = Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [SnakeEye(w: .015, h: .01), SnakeEye(w: .015, h: .01)],
           );
           padding = EdgeInsets.only(left: _width * .006);
           margin = EdgeInsets.symmetric(vertical: headM);
-        } else if (Provider.of<Snake>(context).direct == Direct.Down) {
+        } else if (Provider.of<StagePlay>(context).getDirect() == Direct.Down) {
           child = Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [SnakeEye(w: .01, h: .015), SnakeEye(w: .01, h: .015)],
@@ -110,16 +112,16 @@ class CellProperties {
           margin = EdgeInsets.symmetric(horizontal: headM);
         }
       } else {
-        int _index = Manager.snakeIndex.indexOf(i);
+        int _index = stage.snake!.body.indexOf(i);
         final Radius _cornerRadius = Radius.circular(_cellSize * .4);
         final double _cellMargin = _cellSize * .2;
 
         int next =
-            (Manager.snakeIndex[_index] - Manager.snakeIndex[_index + 1]);
+            (stage.snake!.body[_index] - stage.snake!.body[_index + 1]);
 
         int prev;
         if (_index != 0)
-          prev = (Manager.snakeIndex[_index - 1] - Manager.snakeIndex[_index]);
+          prev = (stage.snake!.body[_index - 1] - stage.snake!.body[_index]);
         else
           prev = 0;
 

@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
 
 import '../gaf_package/gaf_service/ad_manager.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/manager.dart';
-import '../viewmodel/sound_controller.dart';
-import '../viewmodel/timer_controller.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/manager.dart';
+import '../view_model/sound_controller.dart';
+import '../view_model/timer_controller.dart';
 import '../widget/gaf_text.dart';
 import '../widget/main_menu_button.dart';
 import 'stages_screen.dart';

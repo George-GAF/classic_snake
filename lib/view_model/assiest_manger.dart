@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'manager.dart';
-import 'snake.dart';
 
 class AssManager {
-  final BuildContext context;
+  /*final BuildContext context;
   AssManager(this.context);
 
   void changeGameSpeed(int newSpeed) {
@@ -14,7 +9,7 @@ class AssManager {
     Manager.gameSpeed = newSpeed;
     Future.delayed(d, () {
       Manager.isChangeGameSpeed = false;
-      Provider.of<Snake>(context, listen: false).moveSnake();
+      Provider.of<Snake>(context, listen: false).gamePlay();
     });
-  }
+  }*/
 }

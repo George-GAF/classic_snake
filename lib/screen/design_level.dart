@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constant/enum_file.dart';
+import '../constant/game_values.dart';
 import '../model/level_model.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/level_controller.dart';
-import '../viewmodel/manager.dart';
+import '../providers/stagePlay.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/level_controller.dart';
+import '../view_model/manager.dart';
 import '../widget/cell_mod.dart';
 import '../widget/gaf_back_button.dart';
 import '../widget/gaf_change_value_button.dart';
@@ -36,10 +38,10 @@ class _DesignLevelState extends State<DesignLevel> {
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < Manager.snakeIndex.length; i++) {
-      cellTypeList[Manager.snakeIndex[i]] = CellType.Snake;
+    for (int i = 0; i < KSnakeStarting.length; i++) {
+      cellTypeList[KSnakeStarting[i]] = CellType.Snake;
     }
-    cellTypeList[Manager.snakeIndex.last] = CellType.Head;
+    cellTypeList[KSnakeStarting.last] = CellType.Head;
     rowHeight = GameSize().height() - (GameSize().getStageHeight());
     fullData();
   }
@@ -66,8 +68,7 @@ class _DesignLevelState extends State<DesignLevel> {
   }
 
   int maxScore() {
-    return (GameSize.boxCount() - Manager.snakeIndex.length - blocks.length) *
-        10;
+    return (GameSize.boxCount() - KSnakeStarting.length - blocks.length) * 10;
   }
 
   void decreaseScore() {
@@ -85,9 +86,9 @@ class _DesignLevelState extends State<DesignLevel> {
   @override
   Widget build(BuildContext context) {
     Manager.screenAdjust();
-     double width = GameSize().width();
-     double height = GameSize().height();
-     double avaWidth = GameSize().avaWidth();
+    double width = GameSize().width();
+    double height = GameSize().height();
+    double avaWidth = GameSize().avaWidth();
     return Scaffold(
       backgroundColor:
           Provider.of<AppColorController>(context).getColors().basicColor,
@@ -114,7 +115,7 @@ class _DesignLevelState extends State<DesignLevel> {
                             ),
                             GAFText(
                               'Blocks : ${blocks.length}',
-                              fontSize: width* .04,
+                              fontSize: width * .04,
                             ),
                             Column(
                               children: [
@@ -180,7 +181,8 @@ class _DesignLevelState extends State<DesignLevel> {
                                                 GAFText(
                                                   'Information',
                                                   fontSize:
-                                                      GameSize().avaWidth() * .06,
+                                                      GameSize().avaWidth() *
+                                                          .06,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 InkWell(
@@ -194,8 +196,9 @@ class _DesignLevelState extends State<DesignLevel> {
                                                             context)
                                                         .getColors()
                                                         .fontColor,
-                                                    size: GameSize().avaWidth() *
-                                                        .09,
+                                                    size:
+                                                        GameSize().avaWidth() *
+                                                            .09,
                                                   ),
                                                 ),
                                               ],
@@ -219,8 +222,8 @@ class _DesignLevelState extends State<DesignLevel> {
                                     });
                               },
                               child: Container(
-                                padding:
-                                    EdgeInsets.all(GameSize().avaWidth() * .015),
+                                padding: EdgeInsets.all(
+                                    GameSize().avaWidth() * .015),
                                 decoration: BoxDecoration(
                                   color:
                                       Provider.of<AppColorController>(context)
@@ -276,18 +279,17 @@ class _DesignLevelState extends State<DesignLevel> {
                                         rank: 999,
                                         enable: true,
                                         targetScore: targetScore,
-                                        buildWell: blocks,
+                                        blocks: blocks,
                                       );
+                                      Provider.of<StagePlay>(context)
+                                          .start(level);
                                       await Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              PlayScreen(
-                                            stage: level,
-                                          ),
-                                        ),
+                                            builder: (BuildContext context) =>
+                                                PlayScreen()),
                                       );
-                                      Manager.startGame();
+                                      //Manager.startGame();
                                     }
                                   },
                                   label: 'SAVE & PLAY',
@@ -328,7 +330,7 @@ class _DesignLevelState extends State<DesignLevel> {
                       crossAxisCount: GameSize().cellInRow(),
                     ),
                     itemBuilder: (cont, i) {
-                      if (!Manager.snakeIndex.contains(i)) {
+                      if (!KSnakeStarting.contains(i)) {
                         if (blocks.contains(i)) {
                           cellTypeList[i] = CellType.Block;
                         } else {
@@ -338,7 +340,7 @@ class _DesignLevelState extends State<DesignLevel> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            if (!Manager.snakeIndex.contains(i)) {
+                            if (!KSnakeStarting.contains(i)) {
                               if (blocks.contains(i)) {
                                 blocks.remove(i);
                                 cellTypeList[i] = CellType.Ground;
@@ -351,7 +353,7 @@ class _DesignLevelState extends State<DesignLevel> {
                             }
                           });
                         },
-                        child: Manager.snakeIndex.contains(i)
+                        child: KSnakeStarting.contains(i)
                             ? Container(
                                 color: Provider.of<AppColorController>(context)
                                     .getColors()

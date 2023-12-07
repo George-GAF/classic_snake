@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
 
 class ConvertIcon extends StatefulWidget {
   final int? milliseconds;

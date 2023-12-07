@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constant/constant.dart';
-import '../../viewmodel/game_size.dart';
+import '../../view_model/game_size.dart';
 import '../../widget/gaf_text.dart';
 import 'gaf_dialog.dart';
 import 'gaf_dialog_action_button.dart';

@@ -1,11 +1,11 @@
-import 'package:classic_snake/viewmodel/game_size.dart';
+import 'package:classic_snake/view_model/game_size.dart';
 import 'package:classic_snake/widget/gaf_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constant/constant.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/sound_controller.dart';
+import '../view_model/app_color.dart';
+import '../view_model/sound_controller.dart';
 import '../widget/gaf_item.dart';
 import 'converted_icon.dart';
 

@@ -1,12 +1,12 @@
+import 'package:classic_snake/providers/stagePlay.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../model/level_model.dart';
 import '../screen/play_screen.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/level_controller.dart';
-import '../viewmodel/manager.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/level_controller.dart';
 import 'gaf_text.dart';
 
 double _height = GameSize().height();
@@ -15,23 +15,20 @@ double _width = GameSize().width();
 class StageIcon extends StatelessWidget {
   final String? text;
   final int? stageId;
+  late final bool enable ;
 
   void goToPlayScreen(BuildContext context) {
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (BuildContext context) => PlayScreen(
-          stage: levelList[stageId!],
-        ),
+        builder: (BuildContext context) => PlayScreen(),
       ),
     );
-
-    Manager.startGame();
+    Provider.of<StagePlay>(context).start(levelList[stageId!]);
   }
 
   StageIcon({this.text, this.stageId});
-
-  bool enable = false;
 
   Future isOpen() async {
     if (stageId == 0) {

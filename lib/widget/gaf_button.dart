@@ -1,11 +1,11 @@
 
 import 'package:classic_snake/constant/constant.dart';
-import 'package:classic_snake/viewmodel/sound_controller.dart';
+import 'package:classic_snake/view_model/sound_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
 import 'gaf_text.dart';
 
 class GAFButton extends StatelessWidget {

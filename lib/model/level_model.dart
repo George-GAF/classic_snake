@@ -1,23 +1,23 @@
 import '../constant/level_indexs.dart';
-import '../viewmodel/game_size.dart';
+import '../view_model/game_size.dart';
 
 class LevelModel {
   final int rank;
   final int targetScore;
   late int? highScore;
-  final List<int>? buildWell;
+  List<int>? blocks = [];
   bool enable;
 
   LevelModel(
-      { this.highScore,
+      {this.highScore,
       required this.rank,
       required this.targetScore,
       required this.enable,
-       this.buildWell});
+      this.blocks});
 
   @override
   String toString() {
-    return 'level number : $rank complete : $enable target : $targetScore high level $highScore well have $buildWell';
+    return 'level number : $rank complete : $enable target : $targetScore high level $highScore well have $blocks';
   }
 }
 
@@ -60,188 +60,188 @@ LevelModel _free = LevelModel(
   rank: 0,
   targetScore: 0,
   enable: true,
-  buildWell: GameSize.blockIndex = [],
+  blocks: GameSize.blockIndex = [],
 );
 LevelModel _levelOne = LevelModel(
   rank: 1,
   targetScore: 300,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelOne,
+  blocks: GameSize.blockIndex = IndexLevelOne,
 );
 
 LevelModel _levelTwo = LevelModel(
   rank: 2,
   targetScore: 300,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwo,
+  blocks: GameSize.blockIndex = IndexLevelTwo,
 );
 LevelModel _levelThree = LevelModel(
   rank: 3,
   targetScore: 300,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelThree,
+  blocks: GameSize.blockIndex = IndexLevelThree,
 );
 LevelModel _levelFour = LevelModel(
   rank: 4,
   targetScore: 300,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelFour,
+  blocks: GameSize.blockIndex = IndexLevelFour,
 );
 LevelModel _levelFive = LevelModel(
   rank: 5,
   targetScore: 300,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelFive,
+  blocks: GameSize.blockIndex = IndexLevelFive,
 );
 LevelModel _levelSix = LevelModel(
   rank: 6,
   targetScore: 400,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelSix,
+  blocks: GameSize.blockIndex = IndexLevelSix,
 );
 LevelModel _levelSeven = LevelModel(
   rank: 7,
   targetScore: 400,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelSeven,
+  blocks: GameSize.blockIndex = IndexLevelSeven,
 );
 LevelModel _levelEight = LevelModel(
   rank: 8,
   targetScore: 400,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelEight,
+  blocks: GameSize.blockIndex = IndexLevelEight,
 );
 LevelModel _levelNine = LevelModel(
   rank: 9,
   targetScore: 400,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelNine,
+  blocks: GameSize.blockIndex = IndexLevelNine,
 );
 LevelModel _levelTen = LevelModel(
   rank: 10,
   targetScore: 400,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTen,
+  blocks: GameSize.blockIndex = IndexLevelTen,
 );
 LevelModel _levelEleven = LevelModel(
   rank: 11,
   targetScore: 500,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelEleven,
+  blocks: GameSize.blockIndex = IndexLevelEleven,
 );
 LevelModel _levelTwelve = LevelModel(
   rank: 12,
   targetScore: 500,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwelve,
+  blocks: GameSize.blockIndex = IndexLevelTwelve,
 );
 LevelModel _levelThirteen = LevelModel(
   rank: 13,
   targetScore: 500,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelThirteen,
+  blocks: GameSize.blockIndex = IndexLevelThirteen,
 );
 LevelModel _levelFourteen = LevelModel(
   rank: 14,
   targetScore: 500,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelFourteen,
+  blocks: GameSize.blockIndex = IndexLevelFourteen,
 );
 LevelModel _levelFifteen = LevelModel(
   rank: 15,
   targetScore: 500,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelFifteen,
+  blocks: GameSize.blockIndex = IndexLevelFifteen,
 );
 LevelModel _levelSixteen = LevelModel(
   rank: 16,
   targetScore: 600,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelSixteen,
+  blocks: GameSize.blockIndex = IndexLevelSixteen,
 );
 LevelModel _levelSeventeen = LevelModel(
   rank: 17,
   targetScore: 600,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelSeventeen,
+  blocks: GameSize.blockIndex = IndexLevelSeventeen,
 );
 LevelModel _levelEighteen = LevelModel(
   rank: 18,
   targetScore: 600,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelEighteen,
+  blocks: GameSize.blockIndex = IndexLevelEighteen,
 );
 LevelModel _levelNineteen = LevelModel(
   rank: 19,
   targetScore: 600,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelNineteen,
+  blocks: GameSize.blockIndex = IndexLevelNineteen,
 );
 LevelModel _levelTwenty = LevelModel(
   rank: 20,
   targetScore: 600,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwenty,
+  blocks: GameSize.blockIndex = IndexLevelTwenty,
 );
 LevelModel _levelTwentyOne = LevelModel(
   rank: 21,
   targetScore: 700,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyOne,
+  blocks: GameSize.blockIndex = IndexLevelTwentyOne,
 );
 LevelModel _levelTwentyTwo = LevelModel(
   rank: 22,
   targetScore: 700,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyTwo,
+  blocks: GameSize.blockIndex = IndexLevelTwentyTwo,
 );
 LevelModel _levelTwentyThree = LevelModel(
   rank: 23,
   targetScore: 700,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyThree,
+  blocks: GameSize.blockIndex = IndexLevelTwentyThree,
 );
 LevelModel _levelTwentyFour = LevelModel(
   rank: 24,
   targetScore: 700,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyFour,
+  blocks: GameSize.blockIndex = IndexLevelTwentyFour,
 );
 LevelModel _levelTwentyFive = LevelModel(
   rank: 25,
   targetScore: 700,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyFive,
+  blocks: GameSize.blockIndex = IndexLevelTwentyFive,
 );
 LevelModel _levelTwentySix = LevelModel(
   rank: 26,
   targetScore: 800,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentySix,
+  blocks: GameSize.blockIndex = IndexLevelTwentySix,
 );
 LevelModel _levelTwentySeven = LevelModel(
   rank: 27,
   targetScore: 800,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentySeven,
+  blocks: GameSize.blockIndex = IndexLevelTwentySeven,
 );
 LevelModel _levelTwentyEight = LevelModel(
   rank: 28,
   targetScore: 800,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyEight,
+  blocks: GameSize.blockIndex = IndexLevelTwentyEight,
 );
 LevelModel _levelTwentyNine = LevelModel(
   rank: 29,
   targetScore: 800,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelTwentyNine,
+  blocks: GameSize.blockIndex = IndexLevelTwentyNine,
 );
 LevelModel _levelThirty = LevelModel(
   rank: 30,
   targetScore: 800,
   enable: false,
-  buildWell: GameSize.blockIndex = IndexLevelThirteen,
+  blocks: GameSize.blockIndex = IndexLevelThirteen,
 );
 
 /*

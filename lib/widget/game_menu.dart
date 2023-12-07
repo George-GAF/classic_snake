@@ -1,18 +1,18 @@
 import 'dart:developer';
 
-import 'package:classic_snake/gaf_package/ad_widget/rewarded_Ad.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
+import '../gaf_package/ad_widget/rewarded_Ad.dart';
+import '../providers/stagePlay.dart';
 import '../screen/stages_screen.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/manager.dart';
-import '../viewmodel/snake.dart';
-import '../viewmodel/sound_controller.dart';
-import '../viewmodel/timer_controller.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/manager.dart';
+import '../view_model/sound_controller.dart';
+import '../view_model/timer_controller.dart';
 import 'gaf_button.dart';
 import 'gaf_item.dart';
 import 'gaf_text.dart';
@@ -66,7 +66,7 @@ class _GameMenuState extends State<GameMenu> {
               ),
               GAFItem(
                 child: GAFText(
-                  'Your Score : ${Provider.of<Snake>(context).getScore().toString()}\nPlay Time : ${GameTimer.showTimer()}',
+                  'Your Score : ${Provider.of<StagePlay>(context).stageCurrentScore().toString()}\nPlay Time : ${GameTimer.showTimer()}',
                   fontSize: _width * .045,
                   fontWeight: FontWeight.w600,
                 ),
@@ -97,14 +97,14 @@ class _GameMenuState extends State<GameMenu> {
                     if (widget.isPause! && !Manager.requestLife) {
                       Manager.isPause = false;
                       GameTimer.manageTimer();
-                      Provider.of<Snake>(context, listen: false).moveSnake();
+                      Provider.of<StagePlay>(context, listen: false).gamePlay();
                     } else {
                       Manager.gameOver = true;
-                      Provider.of<Snake>(context, listen: false).restGame();
+                      Provider.of<StagePlay>(context, listen: false).endGame();
                       Manager.startGame();
                       Manager.restartPressed = true;
                     }
-                    Provider.of<Snake>(context, listen: false).setMenuState();
+                    Provider.of<StagePlay>(context, listen: false).setMenuState();
                   },
                   startSpace: space,
                 ),
@@ -129,10 +129,10 @@ class _GameMenuState extends State<GameMenu> {
                   icon: Icons.keyboard_return_rounded,
                   onPressed: () async {
                     // await InterstitialAdController.showInterstitialAd();//TODO: change or remove NativeAds
-                    Provider.of<Snake>(context, listen: false).showMenu = false;
+                    Provider.of<StagePlay>(context, listen: false).showMenu = false;
                     //RewardedAdController.setNull();
                     Manager.endGame();
-                    Provider.of<Snake>(context, listen: false).restGame();
+                    Provider.of<StagePlay>(context, listen: false).endGame();
                     Navigator.pushReplacementNamed(
                         context, StageScreen.routeName);
                   },
@@ -158,7 +158,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 }
-
+// TODO : need to show whrn ads
 void _showToastMassage(BuildContext context) {
   Toast.show('No Ad Available',
       duration: 2,
@@ -176,9 +176,9 @@ void runReward(BuildContext context) {
     Manager.isExtraLifeTaken = true;
     Manager.requestLife = false;
     Manager.isPause = false;
-    Provider.of<Snake>(context, listen: false).giveExtraLife();
-    Provider.of<Snake>(context, listen: false).moveSnake();
-    Provider.of<Snake>(context, listen: false).setMenuState();
+    Provider.of<StagePlay>(context, listen: false).giveExtraLife();
+    Provider.of<StagePlay>(context, listen: false).gamePlay();
+    Provider.of<StagePlay>(context, listen: false).setMenuState();
   } catch (e) {}
 
   /*

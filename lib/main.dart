@@ -1,30 +1,27 @@
-import 'package:classic_snake/model/level_model.dart';
-import 'package:classic_snake/viewmodel/game_size.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'providers/stagePlay.dart';
 import 'screen/design_level.dart';
 import 'screen/landing_screen.dart';
 import 'screen/loading_screen.dart';
 import 'screen/menu_screen.dart';
 import 'screen/play_screen.dart';
 import 'screen/stages_screen.dart';
-import 'viewmodel/app_color.dart';
-import 'viewmodel/snake.dart';
-import 'viewmodel/sound_controller.dart';
+import 'view_model/app_color.dart';
+import 'view_model/game_size.dart';
+import 'view_model/manager.dart';
+import 'view_model/sound_controller.dart';
 
 void main() {
-
   WidgetsFlutterBinding.ensureInitialized(); // Needed for SystemChrome.setPreferredOrientations()
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  Manager.screenAdjust();
 runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => Snake()),
+          ChangeNotifierProvider(create: (_)=> StagePlay()),
           ChangeNotifierProvider(create: (_) => AppColorController()),
           ChangeNotifierProvider(create: (_) => GameSound()),
         ],
@@ -56,15 +53,14 @@ class MyApp extends StatelessWidget {
           alignment: MainAxisAlignment.center,
         ),
       ),
-      home: LandingScreen(),
+      home: FutureBuilder(
+        builder: (context , builder) {
+          return LandingScreen();
+        }, future: _initGoogleMobileAds(),
+      ),
       routes: {
         MenuScreen.routeName: (context) => MenuScreen(),
-        PlayScreen.routeName: (context) => PlayScreen(stage:
-          new LevelModel(rank: 0,
-            targetScore: 0,
-            enable: true,
-            buildWell: GameSize.blockIndex = [])
-        ),
+        PlayScreen.routeName: (context) => PlayScreen(),
         LoadingScreen.routeName: (context) => LoadingScreen(),
         StageScreen.routeName: (context) => StageScreen(),
         LandingScreen.routeName: (context) => LandingScreen(),

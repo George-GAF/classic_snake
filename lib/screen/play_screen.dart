@@ -1,20 +1,16 @@
-import 'dart:developer';
 
-import 'package:classic_snake/gaf_package/ad_widget/baneer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../constant/constant.dart';
 import '../constant/enum_file.dart';
+import '../gaf_package/ad_widget/baneer_widget.dart';
 import '../model/level_model.dart';
-import '../viewmodel/app_color.dart';
-import '../viewmodel/assiest_manger.dart';
-import '../viewmodel/game_size.dart';
-import '../viewmodel/level_controller.dart';
-import '../viewmodel/manager.dart';
-import '../viewmodel/snake.dart';
-import '../viewmodel/sound_controller.dart';
-import '../viewmodel/timer_controller.dart';
+import '../providers/stagePlay.dart';
+import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
+import '../view_model/level_controller.dart';
+import '../view_model/manager.dart';
+import '../view_model/timer_controller.dart';
 import '../widget/cell_mod.dart';
 import '../widget/gaf_text.dart';
 import '../widget/game_menu.dart';
@@ -27,67 +23,13 @@ int buildTime = 0;
 
 class PlayScreen extends StatelessWidget {
   static const routeName = '/PlayScreen';
-  final LevelModel stage;
-  static late AssManager assManager;
 
-  PlayScreen({required this.stage});
-
-  bool isPlayMusicHighScore = false;
-  bool isScoreDone = false;
-  bool isScoreBroken = false;
+  PlayScreen();
 
   @override
   Widget build(BuildContext context) {
-    bool isLevelGetRank = false;
-    log("build fun run");
-    log("build time : ${++buildTime}");
-    LevelController? level;
     Manager.screenAdjust();
-    if (!isLevelGetRank) {
-      level = LevelController(stage.rank);
-      isLevelGetRank = true;
-    }
-
-    String title = stage.rank == 0
-        ? 'Survival'
-        : stage.rank == 999
-            ? 'Custom Level'
-            : '${stage.rank}';
-
-    if (!GameSize.isGameBuild) {
-      GameSize.isGameBuild = true;
-      GameSize.blockIndex = [];
-      GameSize.blockIndex = stage.buildWell!;
-      assManager = AssManager(context);
-    }
-
-    double rowHeight = GameSize().height() - (GameSize().getStageHeight());
-
-    if (!isScoreDone) {
-      isScoreDone = level.scoreLevelDone(
-          stage.targetScore, Provider.of<Snake>(context).getScore());
-    }
-
-    Future<bool> highBroken = level.highScoreBroken(
-        level.getLevelHighScore(), Provider.of<Snake>(context).getScore());
-    log("will test $isPlayMusicHighScore");
-    if (!isPlayMusicHighScore) {
-      highBroken.then((isBroken) {
-        log("is broken $isBroken");
-        if (isBroken) {
-          GameSound.playSoundEffect(KHeightScoreBreakFileSound);
-          isPlayMusicHighScore = true;
-        }
-      });
-    }
-
-    if (isScoreDone) {
-      if (!isScoreBroken && stage.targetScore != 0) {
-        GameSound.playSoundEffect(KTargetDoneFileSound);
-        isScoreBroken = true;
-      }
-    }
-
+    final stagePlay = Provider.of<StagePlay>(context);
     return Scaffold(
       backgroundColor:
           Provider.of<AppColorController>(context).getColors().basicColor,
@@ -95,9 +37,10 @@ class PlayScreen extends StatelessWidget {
         child: Stack(
           children: [
             Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 SizedBox(
-                  height: rowHeight,
+                  height: GameSize().rowHeight(),
                   child: Column(
                     children: [
                       FutureBuilder(
@@ -105,46 +48,51 @@ class PlayScreen extends StatelessWidget {
                           builder: (cont, snap) {
                             return BannerWidget();
                           }),
-                      TopPart(title: title, stage: stage, level: level),
+                      TopPart(
+                          title: stagePlay.stage!.getStageTitle(),
+                          stage: stagePlay.level,
+                          level: stagePlay.controller),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: Consumer<Snake>(
-                    builder: (con, snake, child) {
+                  child: Consumer<StagePlay>(
+                    builder: (con, stage, child) {
                       /// make function run one time
                       if (Manager.gameOver) {
-                        snake.setMenuState(refresh: false);
+                        stage.setMenuState(refresh: false);
                       } else if (Manager.requestLife) {
-                        snake.setMenuState(refresh: false);
+                        stage.setMenuState(refresh: false);
                       }
                       return GestureDetector(
                         onVerticalDragUpdate: (d) {
-                          if (snake.direct != Direct.Up && d.delta.dy > 0) {
-                            if (!Manager.moveNow) {
-                              snake.direct = Direct.Down;
-                              Manager.moveNow = true;
-                            }
-                          } else if (snake.direct != Direct.Down &&
+                          if (stage.getDirect() != Direct.Up &&
+                              d.delta.dy > 0) {
+                            //if (!Manager.moveNow) {
+                            stage.changeDirect(Direct.Down);
+                            //Manager.moveNow = true;
+                            //}
+                          } else if (stage.getDirect() != Direct.Down &&
                               d.delta.dy < 0) {
-                            if (!Manager.moveNow) {
-                              snake.direct = Direct.Up;
-                              Manager.moveNow = true;
-                            }
+                            // if (!Manager.moveNow) {
+                            stage.changeDirect(Direct.Up);
+                            // Manager.moveNow = true;
+                            // }
                           }
                         },
                         onHorizontalDragUpdate: (d) {
-                          if (snake.direct != Direct.Left && d.delta.dx > 0) {
-                            if (!Manager.moveNow) {
-                              snake.direct = Direct.Right;
-                              Manager.moveNow = true;
-                            }
-                          } else if (snake.direct != Direct.Right &&
+                          if (stage.getDirect() != Direct.Left &&
+                              d.delta.dx > 0) {
+                            // if (!Manager.moveNow) {
+                            stage.changeDirect(Direct.Right);
+                            // Manager.moveNow = true;
+                            // }
+                          } else if (stage.getDirect() != Direct.Right &&
                               d.delta.dx < 0) {
-                            if (!Manager.moveNow) {
-                              snake.direct = Direct.Left;
-                              Manager.moveNow = true;
-                            }
+                            //  if (!Manager.moveNow) {
+                            stage.changeDirect(Direct.Left);
+                            //  Manager.moveNow = true;
+                            // }
                           }
                         },
                         child: Container(
@@ -157,18 +105,22 @@ class PlayScreen extends StatelessWidget {
                                   .blockColor,
                             ),
                           ),
-                          child: GridView.builder(
-                            itemCount: GameSize.boxCount(),
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: GameSize().cellInRow(),
-                            ),
-                            itemBuilder: (cont, i) {
-                              snake.setCellType(i);
-                              return CellMod(
-                                snake.cellType,
-                                i,
+                          child: Consumer<StagePlay>(
+                            builder: (context, stage, child) {
+                              return GridView.builder(
+                                itemCount: GameSize.boxCount(),
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: GameSize().cellInRow(),
+                                ),
+                                itemBuilder: (cont, i) {
+                                  stage.setCellType(i);
+                                  return CellMod(
+                                    stage.cellType,
+                                    i,
+                                  );
+                                },
                               );
                             },
                           ),
@@ -179,22 +131,24 @@ class PlayScreen extends StatelessWidget {
                 ),
               ],
             ),
-            Provider.of<Snake>(context).showMenu
-                ? shadowContainer(Provider.of<Snake>(context).showMenu, context)
+            stagePlay.showMenu
+                ? shadowContainer(stagePlay.showMenu, context)
                 : SizedBox(),
             GameMenu(
-              visible: Provider.of<Snake>(context).showMenu,
+              visible: stagePlay.showMenu,
               isPause: Manager.isPause,
             ),
-            Provider.of<Snake>(context).showTapMassage
+            stagePlay.showTapMassage
                 ? GestureDetector(
                     onTap: () {
                       if (!Manager.gameRun && !Manager.gameOver) {
                         // todo: add level speed
-                        Provider.of<Snake>(context, listen: false).restGame();
-                        Provider.of<Snake>(context, listen: false)
+                        Provider.of<StagePlay>(context, listen: false)
+                            .endGame();
+                        Provider.of<StagePlay>(context, listen: false)
                             .hideTapMassage();
-                        Provider.of<Snake>(context, listen: false).moveSnake();
+                        Provider.of<StagePlay>(context, listen: false)
+                            .gamePlay();
                         Manager.gameRun = true;
                         GameTimer.runTimer();
                       }
@@ -275,7 +229,7 @@ class TopPart extends StatelessWidget {
                   Row(
                     children: [
                       GAFText(
-                        Provider.of<Snake>(context).reward,
+                        Provider.of<StagePlay>(context).stage!.reward,
                         fontWeight: FontWeight.w900,
                         fontSize: width * .04,
                         softWrap: true,
@@ -284,7 +238,7 @@ class TopPart extends StatelessWidget {
                         width: 5,
                       ),
                       GAFText(
-                        '${Provider.of<Snake>(context).sec == 0 ? '' : Provider.of<Snake>(context).sec}',
+                        '${Provider.of<StagePlay>(context).stage!.sec == 0 ? '' : Provider.of<StagePlay>(context).stage!.sec}',
                         fontWeight: FontWeight.w900,
                         fontSize: width * .04,
                       ),
@@ -316,9 +270,9 @@ class TopPart extends StatelessWidget {
                           Manager.isPause = !Manager.isPause;
                           GameTimer.manageTimer();
                           if (!Manager.isPause)
-                            Provider.of<Snake>(context, listen: false)
-                                .moveSnake();
-                          Provider.of<Snake>(context, listen: false)
+                            Provider.of<StagePlay>(context, listen: false)
+                                .gamePlay();
+                          Provider.of<StagePlay>(context, listen: false)
                               .setMenuState();
                           Manager.sendToBackground = false;
                         },
@@ -347,16 +301,15 @@ class TopPart extends StatelessWidget {
               SizedBox(
                 width: stage?.rank != 0 ? width * .04 : 0,
               ),
-              Consumer<Snake>(
+              Consumer<StagePlay>(
                 builder: (cont, data, child) {
                   return GAFText(
-                    'Score : ${data.getScore()}',
+                    'Score : ${data.stageCurrentScore()}',
                     fontSize: width * .04,
-                    fontWeight: data.getScore() >= stage!.targetScore
+                    fontWeight: data.isTargetBroken()
                         ? FontWeight.w900
                         : FontWeight.normal,
-                    colors: data.getScore() >= stage!.targetScore &&
-                            stage!.rank != 0
+                    colors: data.isTargetBroken() && stage!.rank != 0
                         ? Colors.green[900]
                         : null,
                   );
@@ -366,9 +319,10 @@ class TopPart extends StatelessWidget {
                 width: width * .04,
               ),
               FutureBuilder(
-                builder: (_, data) {
+                builder: (_, hScore) {
+                  Provider.of<StagePlay>(context).readHScore(hScore.data ?? 0);
                   return GAFText(
-                    'High Score : ${(data.data ?? 0)}',
+                    'High Score : ${(hScore.data ?? 0)}',
                     fontSize: width * .04,
                     fontWeight: FontWeight.w900,
                   );
