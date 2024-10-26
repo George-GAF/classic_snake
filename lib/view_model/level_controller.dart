@@ -1,12 +1,7 @@
-//import 'dart:developer';
-
-import 'dart:developer';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/level_model.dart';
 
-//TODO : need to test : because some error note i get
 class LevelController {
   final int rank;
   LevelController(this.rank);
@@ -17,6 +12,12 @@ class LevelController {
   final String _levelTarget = 'level_target';
 
   static List<int> customBlocks = [];
+
+
+
+  String toString(){
+    return 'rank $rank}';
+  }
 
   bool scoreLevelDone(int target, int current) {
     bool scoreDone = current >= target;
@@ -73,7 +74,7 @@ class LevelController {
     List<int> blocks = [];
     int target = 0;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    stringList = (pref.getStringList('$_levelBlocksIndex$rank') ?? null)!;
+    stringList = (pref.getStringList('$_levelBlocksIndex$rank') ?? []);
     //if (stringList == null) return ;
     for (int i = 0; i < stringList.length; i++) {
       blocks.add(int.parse(stringList[i]));

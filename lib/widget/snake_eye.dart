@@ -5,20 +5,18 @@ import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 
 class SnakeEye extends StatelessWidget {
-  final double? w;
-  final double? h;
 
-  const SnakeEye({this.w, this.h});
 
   @override
   Widget build(BuildContext context) {
+    var size = GameSize().cellSize() * .2;
     return Container(
       decoration: BoxDecoration(
-        color: Provider.of<AppColorController>(context).getColors().fontColor,
+        color: context.watch<AppColorController>().getColors().fontColor,
         borderRadius: BorderRadius.circular(50),
       ),
-      width: GameSize().width() * w!,
-      height: GameSize().width() * h!,
+      width: size,
+      height: size,
     );
   }
 }

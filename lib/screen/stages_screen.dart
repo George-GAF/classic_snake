@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../gaf_package/gaf_service/app-update.dart';
+import '../gaf_package/gaf_service/app-rating.dart';
 import '../model/level_model.dart';
 import '../view_model/app_color.dart';
 import '../view_model/manager.dart';
@@ -11,7 +13,7 @@ import '../widget/stage_icon.dart';
 import 'design_level.dart';
 import 'menu_screen.dart';
 
-//bool _dialogShow = false;
+bool _dialogShow = false;
 
 class StageScreen extends StatelessWidget {
   static const routeName = '/stagesScreen';
@@ -19,13 +21,13 @@ class StageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Manager.screenAdjust();
-    /*
+
     if (!_dialogShow) {
-      final up = AppUpdate(context);
-      final rat = AppRating(context);
+      AppUpdate(context);
+      AppRating(context);
       _dialogShow = true;
     }
-*/
+
     double width = MediaQuery.of(context).size.width;
     return Consumer<AppColorController>(
       builder: (cont, color, child) {
@@ -95,7 +97,8 @@ class StageScreen extends StatelessWidget {
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 3,
                                 ),
-                                itemCount: levelList.length,
+                                //to avoid show last item in list because this save customize level data
+                                itemCount: levelList.length - 1,
                               ),
                             ),
                           ],

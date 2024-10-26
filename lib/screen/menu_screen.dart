@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../gaf_package/gaf_service/ad_manager.dart';
 import '../view_model/app_color.dart';
@@ -81,7 +81,7 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                             MainMenuButton(
                               onPressed: () {
                                 GameSound.stopAllSoundOnExit();
-                                Wakelock.disable();
+                                WakelockPlus.disable();
                                 SystemNavigator.pop();
                               },
                               label: 'Exit',

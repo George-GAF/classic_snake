@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -18,7 +16,6 @@ class _BannerWidgetState extends State<BannerWidget> {
   @override
   void initState() {
     super.initState();
-    log("init from banner run");
     BannerAd(
       adUnitId: AdManager.bannerAdUnitIdAndroid,
       size: AdSize.banner,
@@ -40,8 +37,7 @@ class _BannerWidgetState extends State<BannerWidget> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    WidgetsBinding.instance.removeObserver(this as WidgetsBindingObserver);
+
     _ad?.dispose();
     super.dispose();
   }
@@ -58,7 +54,7 @@ class _BannerWidgetState extends State<BannerWidget> {
         ),
       );
     } else {
-      return Container(
+      return SizedBox(
         height: 60,
         width: double.infinity,
       );

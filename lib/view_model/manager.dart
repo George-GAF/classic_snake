@@ -1,8 +1,8 @@
-import 'package:classic_snake/constant/game_values.dart';
+import 'package:classic_snake/view_model/timer_controller.dart';
 import 'package:flutter/material.dart' show BuildContext, showDialog;
 import 'package:flutter/services.dart';
 
-import '../constant/enum_file.dart';
+import '../constant/game_values.dart';
 import '../widget/option_menu.dart';
 import 'game_size.dart';
 
@@ -19,8 +19,10 @@ class Manager {
   static bool timerSFRun = false;
   static bool sendToBackground = false;
   static bool isMustChangeSnakeColor = false;
+  static bool isSFoodEating = false;
 
-  static int bonus = 0;
+  static int currentStageID = 0;
+  static int gameScore = 0;
   static int seconds = 0;
   static List<int> giftFoods = [];
   static List<int> snake = [];
@@ -28,13 +30,16 @@ class Manager {
   static int food = 0;
 
   static void startGame() {
+    GameTimer.manageTimer();
     gameRun = false;
     gameOver = false;
     isPause = false;
     showChild = false;
     sendToBackground = false;
+    timerSFRun = false;
+    isSFoodEating = false;
+    gameScore = 0;
     gameSpeed = KDefaultGameSpeed;
-
   }
 
   static void endGame() {
@@ -47,7 +52,7 @@ class Manager {
     GameSize.isGameBuild = false;
     restartPressed = true;
     seconds = 0;
-    bonus = 0;
+    gameScore = 0;
     snake = [];
     food = 0;
     blocks = [];
@@ -59,7 +64,7 @@ class Manager {
   }
 
   static void screenAdjust() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -73,11 +78,12 @@ class Manager {
           return OptionMenu();
         });
   }
- static bool isLastCellInRow(int index) {
+
+  static bool isLastCellInRow(int index) {
     return ((index - 19) % GameSize().cellInRow()) == 0;
   }
 
- static bool isFirstCellInRow(int index) {
+  static bool isFirstCellInRow(int index) {
     return (index % GameSize().cellInRow()) == 0;
   }
   /*

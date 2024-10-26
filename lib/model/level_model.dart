@@ -2,8 +2,8 @@ import '../constant/level_indexs.dart';
 import '../view_model/game_size.dart';
 
 class LevelModel {
-  final int rank;
-  final int targetScore;
+  final int? rank;
+  final int? targetScore;
   late int? highScore;
   List<int>? blocks = [];
   bool enable;
@@ -17,7 +17,7 @@ class LevelModel {
 
   @override
   String toString() {
-    return 'level number : $rank complete : $enable target : $targetScore high level $highScore well have $blocks';
+    return 'level number : $rank complete : $enable target : $targetScore high Score $highScore blocks $blocks';
   }
 }
 
@@ -54,7 +54,15 @@ List<LevelModel> levelList = [
   _levelTwentyEight,
   _levelTwentyNine,
   _levelThirty,
+  customize
 ];
+
+LevelModel customize = LevelModel(
+  rank: 999,
+  targetScore: 0,
+  enable: true,
+  blocks: GameSize.blockIndex = [],
+);
 
 LevelModel _free = LevelModel(
   rank: 0,

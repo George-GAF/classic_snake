@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
@@ -23,7 +23,6 @@ class GameSound extends ChangeNotifier {
 
   static void playSoundEffect(String soundName) async {
     if (soundON) {
-      log("playSoundEffect run $soundName");
       _volume = .3;
        await _player.play(AssetSource(soundName), volume: _volume);
       _volume = .5;
@@ -40,11 +39,9 @@ class GameSound extends ChangeNotifier {
   }
 
   void _playBackgroundSound() async {
-    log("play back ground sound ON ");
     _backGroundSound.play(AssetSource(KMusicFileSound), volume: _volume);
     _backGroundSound.setReleaseMode(ReleaseMode.loop);
     _backGroundSound.onPlayerComplete.listen((_) {
-      log("on complete run");
       _backGroundSound.play(AssetSource(KMusicFileSound), volume: _volume);
     });
   }
@@ -81,7 +78,6 @@ class GameSound extends ChangeNotifier {
   void _getMusic({bool refresh = true}) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     musicON = pref.getBool(_musicStateKey) ?? true;
-    log("music on $musicON");
     if (refresh) notifyListeners();
   }
 

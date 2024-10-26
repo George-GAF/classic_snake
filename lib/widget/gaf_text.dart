@@ -33,6 +33,7 @@ class GAFText extends StatelessWidget {
       softWrap: softWrap ?? true,
       textAlign: textAlign ?? TextAlign.start,
       textScaleFactor: 1,
+       // textScaler:TextScaler.linear(1),
       style: TextStyle(
         color: colors ??
             Provider.of<AppColorController>(context)

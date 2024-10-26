@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'providers/stagePlay.dart';
 import 'screen/design_level.dart';
@@ -37,8 +37,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    Wakelock.enable();
+    WakelockPlus.enable();
     GameSize().calcGameSize(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
     Provider.of<AppColorController>(context, listen: false).applyColors();
     GameSound().getSoundSetting();
@@ -49,9 +48,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Mail',
         textTheme: TextTheme(bodyLarge: TextStyle(color: Colors.white)),
-        buttonBarTheme: ButtonBarThemeData(
-          alignment: MainAxisAlignment.center,
-        ),
       ),
       home: FutureBuilder(
         builder: (context , builder) {

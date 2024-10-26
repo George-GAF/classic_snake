@@ -1,17 +1,14 @@
 import 'dart:math';
 
-import 'package:classic_snake/constant/game_values.dart';
-import 'package:flutter/foundation.dart';
-
 import '../constant/constant.dart';
-import '../screen/play_screen.dart';
+import '../constant/game_values.dart';
 import 'game_size.dart';
 import 'manager.dart';
 import 'sound_controller.dart';
 
-class SpecialFood extends ChangeNotifier {
+class SpecialFood {
   SpecialFood();
-
+  int? _giftBonus;
   static bool immortal = false;
   String _reward = '';
 
@@ -49,7 +46,9 @@ class SpecialFood extends ChangeNotifier {
       _reward = '';
       immortal = false;
       Manager.giftFoods = [];
-      // Manager.bonus = 0;
+      Manager.timerSFRun = false;
+      Manager.isSFoodEating = false;
+      //Manager.gameScore = 0;
       Manager.seconds = 0;
       if (Manager.gameSpeed != KDefaultGameSpeed) {
         Manager.changeGameSpeed(KDefaultGameSpeed);
@@ -66,20 +65,22 @@ class SpecialFood extends ChangeNotifier {
     return 'IMMORTAL';
   }
 
-  int? _giftBonus;
+
 
   String _increaseScore() {
+    _giftBonus = 0;
     Manager.seconds = 1;
     _giftBonus = Random().nextInt(200) + 10;
-    Manager.bonus += _giftBonus!;
+    Manager.gameScore += _giftBonus!;
     GameSound.playSoundEffect(KGoodLuckFileSound);
     return 'Score Plus $_giftBonus';
   }
 
   String _decreaseScore() {
+    _giftBonus = 0;
     Manager.seconds = 1;
     _giftBonus = -Random().nextInt(200) - 10;
-    Manager.bonus += _giftBonus!;
+    Manager.gameScore += _giftBonus!;
     GameSound.playSoundEffect(KBadLuckFileSound);
     return 'Score Minus $_giftBonus';
   }
@@ -91,6 +92,7 @@ class SpecialFood extends ChangeNotifier {
 
   String _giftFoods() {
     Manager.seconds = 50;
+
     CreateGiftFoodIndex().fillList();
     GameSound.playSoundEffect(KGoodLuckFileSound);
     return 'More Food';

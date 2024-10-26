@@ -15,6 +15,7 @@ class SnakeCorner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double space = GameSize().cellSize() * .12;
+    var colors = context.watch<AppColorController>().getColors();
     return Stack(
       children: [
         Container(
@@ -24,15 +25,11 @@ class SnakeCorner extends StatelessWidget {
               borderRadius: corner,
               boxShadow: [
                 BoxShadow(
-                  color: Provider.of<AppColorController>(context)
-                      .getColors()
-                      .darkShadow,
+                  color: colors.darkShadow,
                   offset: Offset(space, space),
                 ),
                 BoxShadow(
-                  color: Provider.of<AppColorController>(context)
-                      .getColors()
-                      .lightShadow,
+                  color: colors.lightShadow,
                   offset: Offset(-space, -space),
                 ),
               ]),
@@ -40,8 +37,7 @@ class SnakeCorner extends StatelessWidget {
         Container(
           margin: backMargin,
           decoration: BoxDecoration(
-            color:
-                Provider.of<AppColorController>(context).getColors().basicColor,
+            color: colors.basicColor,
             borderRadius: corner,
           ),
         ),

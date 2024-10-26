@@ -78,7 +78,7 @@ AppColor greenColor = AppColor(
   lightShadow: Color.fromRGBO(50, 50, 50, .7),
   snakeColor: Colors.white70,
   loadingColor: Colors.lightBlueAccent,
-  foodColor: Colors.teal,
+  foodColor: Colors.blue,
   fontShadow: Colors.green,
   blockColor: Color.fromRGBO(67, 67, 67, 1),
 );

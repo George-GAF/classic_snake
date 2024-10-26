@@ -2,10 +2,13 @@
     package="com.gaf.classic_snake">
    <application
         android:label="Snake Classic"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+       android:enableOnBackInvokedCallback="true"
+       >
        <meta-data
            android:name="com.google.android.gms.ads.APPLICATION_ID"
            android:value="ca-app-pub-3877304040688947~1469806211"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
