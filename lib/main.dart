@@ -14,7 +14,7 @@ import 'view_model/app_color.dart';
 import 'view_model/game_size.dart';
 import 'view_model/manager.dart';
 import 'view_model/sound_controller.dart';
-
+//android.bundle.enableUncompressedNativeLibs=false
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // Needed for SystemChrome.setPreferredOrientations()
   Manager.screenAdjust();
@@ -29,7 +29,8 @@ runApp(
       ),
     );
 }
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatelessWidget  {
 
   Future<InitializationStatus> _initGoogleMobileAds() {
     return MobileAds.instance.initialize();

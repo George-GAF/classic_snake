@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,11 +37,7 @@ class TopPart extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          FutureBuilder(
-              future: Future.delayed(Duration(seconds: 5)),
-              builder: (cont, snap) {
-                return BannerWidget();
-              }),
+          BannerWidget(),
           GAFText(
             'Level : $title',
             fontWeight: FontWeight.w900,

@@ -1,29 +1,9 @@
-// Banner 'ca-app-pub-3940256099942544/6300978111'test
-// Native 'ca-app-pub-3940256099942544/2247696110'test
 class AdManager {
-  static const String
-      _appIdAndroid = /*'ca-app-pub-3940256099942544~4354546703';*/
-      'ca-app-pub-3877304040688947~1469806211'; //ca-app-pub-3877304040688947~7752072757
-
   static const String bannerAdUnitIdAndroid =
       'ca-app-pub-3877304040688947/7763210458';
-  //'ca-app-pub-3940256099942544/6300978111'; //ca-app-pub-3877304040688947/3429684366
 
-  static const String bannerAdUnitIdTopAndroid = '';
-
-  static const String bannerAdUnitIdBottomAndroid = '';
-
-  static const String _interstitialAdUnitIdAndroid =
-      'ca-app-pub-3877304040688947/3385523110';
   static const String rewardedAdUnitIdAndroid =
       'ca-app-pub-3877304040688947/9920616656';
-  //'ca-app-pub-3940256099942544/5224354917';
-  // 'ca-app-pub-3877304040688947/9920616656';
-
-  static const String _appIdIOS = '';
-  static const String _bannerAdUnitIdIOS = '';
-  static const String _interstitialAdUnitIdIOS = '';
-  static const String _rewardedAdUnitIdIOS = '';
 
   static bool _adRun = false;
 
@@ -31,6 +11,7 @@ class AdManager {
     if (!_adRun) {
       //_adRun =
       // await FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+
     } else {
       _adRun = true;
     }

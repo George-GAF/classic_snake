@@ -52,121 +52,121 @@ class _GameMenuState extends State<GameMenu> {
           top: widget.visible! ? _height * .1 : _height,
           duration: Duration(milliseconds: Manager.gameSpeed),
           child: Container(
-                  padding: EdgeInsets.symmetric(
-                      vertical: _height * .03, horizontal: _width * .05),
-                  decoration: BoxDecoration(
-                    color: context
-                        .watch<AppColorController>()
-                        .getColors()
-                        .basicColor,
-                    borderRadius: BorderRadius.circular(_width * .05),
-                  ),
-                  width: _width * .95,
-                  height: _height * .8,
-                  margin: EdgeInsets.symmetric(horizontal: _width * .025),
-                  child: stagePlayWatch.showAskMenu
-                      ? AskToMoveNextLevel()
-                      : Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      GAFItem(
-                        child: GAFText(
-                          widget.isPause! ? 'Game Pause' : 'Game Over',
-                          fontSize: _width * .09,
-                          fontWeight: FontWeight.bold,
+              padding: EdgeInsets.symmetric(
+                  vertical: _height * .03, horizontal: _width * .05),
+              decoration: BoxDecoration(
+                color:
+                    context.watch<AppColorController>().getColors().basicColor,
+                borderRadius: BorderRadius.circular(_width * .05),
+              ),
+              width: _width * .95,
+              height: _height * .8,
+              margin: EdgeInsets.symmetric(horizontal: _width * .025),
+              child: stagePlayWatch.showAskMenu
+                  ? AskToMoveNextLevel()
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        GAFItem(
+                          child: GAFText(
+                            widget.isPause! ? 'Game Pause' : 'Game Over',
+                            fontSize: _width * .09,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      GAFItem(
-                        child: GAFText(
-                          'Your Score : ${stagePlayWatch.stageCurrentScore().toString()}\nPlay Time : ${GameTimer.showTimer()}',
-                          fontSize: _width * .045,
-                          fontWeight: FontWeight.w600,
+                        GAFItem(
+                          child: GAFText(
+                            'Your Score : ${stagePlayWatch.stageCurrentScore().toString()}\nPlay Time : ${GameTimer.showTimer()}',
+                            fontSize: _width * .045,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Manager.requestLife
-                          ? GAFItem(
-                              paddingH: 0,
-                              paddingV: 0,
-                              child: GAFButton(
-                                text: 'Continue',
-                                icon: Icons.play_arrow_rounded,
-                                onPressed: () {
-                                  RewardedHelperAd().showAd(
-                                      () => {runReward(context)}, context);
-                                },
-                                startSpace: space,
-                              ),
-                            )
-                          : SizedBox(),
-                      GAFItem(
-                        paddingH: 0,
-                        paddingV: 0,
-                        child: GAFButton(
-                          text: widget.isPause! && !Manager.requestLife
-                              ? 'Resume'
-                              : 'Restart',
-                          icon: Icons.reset_tv,
-                          onPressed: () {
-                            if (widget.isPause! && !Manager.requestLife) {
-                              Manager.isPause = false;
-                              GameTimer.manageTimer();
-                              stageRead.gamePlay();
-                            } else {
-                              Manager.gameOver = true;
+                        Manager.requestLife
+                            ? GAFItem(
+                                paddingH: 0,
+                                paddingV: 0,
+                                child: GAFButton(
+                                  text: 'Continue',
+                                  icon: Icons.play_arrow_rounded,
+                                  onPressed: () {
+                                    RewardedHelperAd().showAd(() {
+                                      runReward(context);
+
+                                    }, context);
+                                  },
+                                  startSpace: space,
+                                ),
+                              )
+                            : SizedBox(),
+                        GAFItem(
+                          paddingH: 0,
+                          paddingV: 0,
+                          child: GAFButton(
+                            text: widget.isPause! && !Manager.requestLife
+                                ? 'Resume'
+                                : 'Restart',
+                            icon: Icons.reset_tv,
+                            onPressed: () {
+                              if (widget.isPause! && !Manager.requestLife) {
+                                Manager.isPause = false;
+                                GameTimer.manageTimer();
+                                stageRead.gamePlay();
+                              } else {
+                                Manager.gameOver = true;
+                                stageRead.endGame();
+                                Manager.restartPressed = true;
+                                stagePlayWatch.start(Manager.currentStageID);
+                              }
+                              stageRead.setMenuState();
+                            },
+                            startSpace: space,
+                          ),
+                        ),
+                        GAFItem(
+                          paddingH: 0,
+                          paddingV: 0,
+                          child: GAFButton(
+                            text: 'Option',
+                            icon: Icons.settings_applications_rounded,
+                            onPressed: () {
+                              Manager.showOptionMenu(context);
+                            },
+                            startSpace: space,
+                          ),
+                        ),
+                        GAFItem(
+                          paddingH: 0,
+                          paddingV: 0,
+                          child: GAFButton(
+                            text: 'Back To Main',
+                            icon: Icons.keyboard_return_rounded,
+                            onPressed: () async {
+                              // await InterstitialAdController.showInterstitialAd();//TODO: change or remove NativeAds
+                              stageRead.showMenu = false;
+                              //RewardedAdController.setNull();
                               stageRead.endGame();
-                              Manager.restartPressed = true;
-                              stagePlayWatch.start(Manager.currentStageID);
-                            }
-                            stageRead.setMenuState();
-                          },
-                          startSpace: space,
+                              await Navigator.pushReplacementNamed(
+                                  context, StageScreen.routeName);
+                            },
+                            startSpace: space,
+                          ),
                         ),
-                      ),
-                      GAFItem(
-                        paddingH: 0,
-                        paddingV: 0,
-                        child: GAFButton(
-                          text: 'Option',
-                          icon: Icons.settings_applications_rounded,
-                          onPressed: () {
-                            Manager.showOptionMenu(context);
-                          },
-                          startSpace: space,
-                        ),
-                      ),
-                      GAFItem(
-                        paddingH: 0,
-                        paddingV: 0,
-                        child: GAFButton(
-                          text: 'Back To Main',
-                          icon: Icons.keyboard_return_rounded,
-                          onPressed: () async {
-                            // await InterstitialAdController.showInterstitialAd();//TODO: change or remove NativeAds
-                            stageRead.showMenu = false;
-                            //RewardedAdController.setNull();
-                            stageRead.endGame();
-                            await Navigator.pushReplacementNamed(
-                                context, StageScreen.routeName);
-                          },
-                          startSpace: space,
-                        ),
-                      ),
-                      GAFItem(
-                        paddingH: 0,
-                        paddingV: 0,
-                        //paddingV: 5,
-                        child: GAFButton(
-                          text: 'Exit',
-                          icon: Icons.exit_to_app_rounded,
-                          onPressed: () {
-                            GameSound.stopAllSoundOnExit();
-                            SystemNavigator.pop(animated: true);
-                          },
-                          startSpace: space,
-                        ),
-                      )
-                    ],
-                  )),
+                        GAFItem(
+                          paddingH: 0,
+                          paddingV: 0,
+                          //paddingV: 5,
+                          child: GAFButton(
+                            text: 'Exit',
+                            icon: Icons.exit_to_app_rounded,
+                            onPressed: () {
+                              GameSound.stopAllSoundOnExit();
+                              SystemNavigator.pop(animated: true);
+                            },
+                            startSpace: space,
+                          ),
+                        )
+                      ],
+                    )),
         ),
       ],
     );
@@ -181,6 +181,7 @@ void _showToastMassage(BuildContext context) {
       backgroundColor:
           context.read<AppColorController>().getColors().darkShadow);
 }
+
 //*/
 void runReward(BuildContext context) {
   var stagePlay = context.read<StagePlay>();
@@ -192,7 +193,7 @@ void runReward(BuildContext context) {
     stagePlay.gamePlay();
     stagePlay.setMenuState();
   } catch (e) {
-    //_showToastMassage(context);
+    _showToastMassage(context);
   }
 
   /*

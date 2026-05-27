@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/stagePlay.dart';
-import '../../view_model/app_color.dart';
 import '../../constant/enum_file.dart';
 import '../../view_model/game_size.dart';
 import '../../view_model/manager.dart';

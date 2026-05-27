@@ -106,4 +106,23 @@ class GameSound extends ChangeNotifier {
     _getMusic();
     return musicON;
   }
+// to pause music if app in background
+  bool isAppInForeground = true;
+
+  Future<void> playAudio(String url) async {
+    if (isAppInForeground) {
+      await _backGroundSound.play(UrlSource(url));
+    }
+  }
+
+  Future<void> pauseAudio() async {
+    await _backGroundSound.pause();
+  }
+
+  void setIsAppInForeground(bool value) {
+    isAppInForeground = value;
+    notifyListeners();
+  }
+
+
 }

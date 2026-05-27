@@ -46,7 +46,7 @@ android {
     namespace = "com.gaf.classic_snake"
     //compileSdkVersion 34
     compileSdk = 34//flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "25.1.8937393" //flutter.ndkVersion
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

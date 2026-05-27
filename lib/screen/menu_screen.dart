@@ -46,69 +46,64 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
     double width = GameSize().width();
     return showLoadCircle
         ? LoadingContainer()
-        : FutureBuilder(
-            future:AdManager.initAdMob(),//TODO : change it to native or remove
-            builder: (_, __) {
-              return Consumer<AppColorController>(builder: (cont, data, wid) {
-                return Scaffold(
-                  backgroundColor: data.getColors().basicColor,
-                  body: Center(
-                    child: Stack(
-                      fit: StackFit.expand,
+        : Consumer<AppColorController>(builder: (cont, data, wid) {
+          return Scaffold(
+            backgroundColor: data.getColors().basicColor,
+            body: Center(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      MainMenuButton(
+                        onPressed: ()  {
+                          setState(() {
+                            showLoadCircle = true;
+                          });
+                           Navigator.of(context).pushReplacementNamed( StageScreen.routeName);
+                        },
+                        label: 'START',
+                        fontSize: width * .1,
+                        showImage: true,
+                      ),
+                      MainMenuButton(
+                        onPressed: () {
+                          Manager.showOptionMenu(context);
+                        },
+                        label: 'Option',
+                        padding: 90,
+                        fontSize: width * .07,
+                      ),
+                      MainMenuButton(
+                        onPressed: () {
+                          GameSound.stopAllSoundOnExit();
+                          WakelockPlus.disable();
+                          SystemNavigator.pop();
+                        },
+                        label: 'Exit',
+                        padding: 130,
+                        fontSize: width * .05,
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    child: Row(
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            MainMenuButton(
-                              onPressed: ()  {
-                                setState(() {
-                                  showLoadCircle = true;
-                                });
-                                 Navigator.of(context).pushReplacementNamed( StageScreen.routeName);
-                              },
-                              label: 'START',
-                              fontSize: width * .1,
-                              showImage: true,
-                            ),
-                            MainMenuButton(
-                              onPressed: () {
-                                Manager.showOptionMenu(context);
-                              },
-                              label: 'Option',
-                              padding: 90,
-                              fontSize: width * .07,
-                            ),
-                            MainMenuButton(
-                              onPressed: () {
-                                GameSound.stopAllSoundOnExit();
-                                WakelockPlus.disable();
-                                SystemNavigator.pop();
-                              },
-                              label: 'Exit',
-                              padding: 130,
-                              fontSize: width * .05,
-                            ),
-                          ],
-                        ),
-                        Positioned(
-                          child: Row(
-                            children: [
-                              GAFText(
-                                '\t\t\tMade By GAF-Programing 2023',
-                                fontSize:width * .035,
-                              ),
-                            ],
-                          ),
-                          bottom: 0,
-                          left: 0,
+                        GAFText(
+                          '\t\t\tMade By GAF-Programing 2023',
+                          fontSize:width * .035,
                         ),
                       ],
                     ),
+                    bottom: 0,
+                    left: 0,
                   ),
-                );
-              });
-            },
+                ],
+              ),
+            ),
           );
+        });
   }
 }
 

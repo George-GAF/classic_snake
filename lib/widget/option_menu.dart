@@ -1,14 +1,14 @@
-import 'package:classic_snake/view_model/game_size.dart';
-import 'package:classic_snake/widget/gaf_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constant/constant.dart';
 import '../view_model/app_color.dart';
+import '../view_model/game_size.dart';
 import '../view_model/sound_controller.dart';
 import '../widget/gaf_item.dart';
 import 'converted_icon.dart';
-
+import 'gaf_text.dart';
 
 double _height = GameSize().height();
 double _width = GameSize().width();
@@ -40,7 +40,6 @@ class OptionMenu extends StatelessWidget {
                     onTap: () {
                       GameSound.playSoundEffect(KButtonClick);
                       Navigator.pop(context);
-
                     },
                     child: Icon(
                       Icons.close,
@@ -142,6 +141,20 @@ class OptionMenu extends StatelessWidget {
               paddingH: _width * .06,
               radius: _width * .02,
             ),
+            GAFItem(
+              child: TextButton(
+                onPressed: () {
+                  _launchURL('https://sites.google.com/view/privacypolicyclassicsnake/home');
+                },
+                child: GAFText(
+                  'Read Privacy Policy',
+                  fontSize: _width * .05,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              paddingH: _width * .06,
+              radius: _width * .02,
+            ),
             SizedBox(
               height: _height * .015,
             )
@@ -149,5 +162,11 @@ class OptionMenu extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+Future<void> _launchURL(String url) async {
+  if (!await launchUrl(Uri.parse(url))) {
+    throw 'Could not launch $url';
   }
 }
