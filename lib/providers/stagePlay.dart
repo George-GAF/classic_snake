@@ -67,21 +67,6 @@ class StagePlay extends ChangeNotifier {
     showMenu = Manager.gameOver || Manager.isPause;
     if (refresh) notifyListeners();
   }
-/*
-  void setCellType(int i) {
-    // dev.log('from setCellType ${level.toString()}');
-    final tS = snake!.getBody();
-    cellType = CellType.Ground;
-    if (level!.blocks!.contains(i)) {
-      cellType = CellType.Block;
-    } else if (tS.contains(i)) {
-      cellType = CellType.Snake;
-    } else if (stage!.food == i) {
-      cellType = CellType.Food;
-    } else if (stage!.sFood == i) {
-      cellType = CellType.SpecialFood;
-    } else if (Manager.giftFoods.contains(i)) cellType = CellType.Food;
-  }*/
 
   void readHScore(int hScore) {
     _hScore = hScore;

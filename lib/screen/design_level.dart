@@ -33,7 +33,7 @@ class _DesignLevelState extends State<DesignLevel> {
 
   double? rowHeight;
   int targetScore = 0;
-  bool up = false;
+  Timer? _scoreTimer;
 
   @override
   void initState() {
@@ -46,6 +46,12 @@ class _DesignLevelState extends State<DesignLevel> {
     fullData();
   }
 
+  @override
+  void dispose() {
+    _scoreTimer?.cancel();
+    super.dispose();
+  }
+
   void fullData() async {
     LevelController level = LevelController(999);
     final temp = await level.levelRestore();
@@ -55,32 +61,24 @@ class _DesignLevelState extends State<DesignLevel> {
     });
   }
 
-  void increaseScore() {
-    Duration d = Duration(milliseconds: 20);
-    Timer.periodic(d, (timer) {
-      if (up) {
+  void startChangingScore(int delta) {
+    if (_scoreTimer != null) return;
+    _scoreTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
+      if (mounted) {
         setState(() {
-          if (targetScore < maxScore()) targetScore += 10;
+          targetScore = (targetScore + delta).clamp(0, maxScore());
         });
-      } else
-        timer.cancel();
+      }
     });
+  }
+
+  void stopChangingScore() {
+    _scoreTimer?.cancel();
+    _scoreTimer = null;
   }
 
   int maxScore() {
     return (GameSize.boxCount() - KSnakeStarting.length - blocks.length) * 10;
-  }
-
-  void decreaseScore() {
-    Duration d = Duration(milliseconds: 20);
-    Timer.periodic(d, (timer) {
-      if (up) {
-        setState(() {
-          if (targetScore > 0) targetScore -= 10;
-        });
-      } else
-        timer.cancel();
-    });
   }
 
   @override
@@ -124,11 +122,10 @@ class _DesignLevelState extends State<DesignLevel> {
                               children: [
                                 GAFChangeValueButton(
                                   onStart: () {
-                                    up = true;
-                                    increaseScore();
+                                    startChangingScore(10);
                                   },
                                   onEnd: () {
-                                    up = false;
+                                    stopChangingScore();
                                   },
                                   onPressed: () {
                                     setState(() {
@@ -149,11 +146,10 @@ class _DesignLevelState extends State<DesignLevel> {
                                     });
                                   },
                                   onStart: () {
-                                    up = true;
-                                    decreaseScore();
+                                    startChangingScore(-10);
                                   },
                                   onEnd: () {
-                                    up = false;
+                                    stopChangingScore();
                                   },
                                   icon: Icons.remove,
                                 ),

@@ -55,9 +55,9 @@ class Snake {
     _update(newV);
   }
 
-  void _update(int value, {bool isEat = false}) {
+  void _update(int value, {bool trimTail = false}) {
     final tBody = List<int>.from(_body);
-    if (!isEat)
+    if (!trimTail)
       tBody.add(value);
     else
       tBody.removeAt(0);
@@ -78,10 +78,10 @@ class Snake {
       return FoodType.GiftFood;
     }
     if (_head == sFood) {
-      _update(0, isEat: true);
+      _update(0, trimTail: true);
       return FoodType.SFood;
     }
-    _update(0, isEat: true);
+    _update(0, trimTail: true);
     return FoodType.None;
   }
 

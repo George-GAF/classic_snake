@@ -21,7 +21,6 @@ class GameSize {
   static List<int> blockIndex = [];
 
   static double _sideMargin = 0;
-  //static const double _per = .5625;
 
   void calcGameSize(double width, double height) {
     _width = width > height ? height : width;
@@ -50,21 +49,6 @@ class GameSize {
     return GameSize().height() - (GameSize().getStageHeight());
   }
 
-  /*
-  static void calcWideScreen() {
-
-    if (width / height != _per) {
-      isWideScreen = true;
-      _sideMargin = width - (height * _per);
-    }
-
-  }
-
-  static int cellSize() {
-    if (_cellSize == 0) _cellSize = ((width - _sideMargin) / cellInRow).round();
-    return _cellSize;
-  }
-*/
   double avaWidth() {
     return _width - _sideMargin;
   }
@@ -88,31 +72,4 @@ class GameSize {
   static int boxCount() {
     return _boxCount;
   }
-/*
-  static void getWellIndex(
-      {bool top = false,
-      bool right = false,
-      bool left = false,
-      bool bottom = false,
-      required List<int> block}) {
-    blockIndex = [];
-    List<int> well = [];
-    if (top) well = List<int>.generate(_cellInRow, (i) => i);
-    if (left) {
-      List<int> side = List<int>.generate(_rowNum, (i) => i * _cellInRow);
-      well.addAll(side);
-    }
-    if (right) {
-      List<int> side = List<int>.generate(
-          _rowNum, (i) => (i * _cellInRow) + (_cellInRow - 1));
-      well.addAll(side);
-    }
-    if (bottom) {
-      List<int> side = List<int>.generate(
-          _cellInRow, (i) => ((_rowNum - 1) * _cellInRow) + i);
-      well.addAll(side);
-    }
-    blockIndex.addAll(well);
-    blockIndex.addAll(block);
-  }*/
 }
