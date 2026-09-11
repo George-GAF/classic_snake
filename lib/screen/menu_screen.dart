@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../gaf_package/gaf_service/ad_manager.dart';
 import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 import '../view_model/manager.dart';
@@ -56,6 +55,23 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      GAFText(
+                        'SNAKE',
+                        fontSize: width * .16,
+                        fontWeight: FontWeight.w900,
+                        textAlign: TextAlign.center,
+                        glowColor: data.getColors().glowColor,
+                        shadows: [],
+                      ),
+                      SizedBox(height: width * .01),
+                      GAFText(
+                        'CYBER  CRAWL',
+                        fontSize: width * .045,
+                        colorOpacity: .6,
+                        textAlign: TextAlign.center,
+                        shadows: [],
+                      ),
+                      SizedBox(height: width * .08),
                       MainMenuButton(
                         onPressed: ()  {
                           setState(() {

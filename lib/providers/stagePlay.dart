@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../constant/constant.dart';
 import '../constant/enum_file.dart';
-import '../constant/game_values.dart';
 import '../helper/snake.dart';
 import '../helper/stage.dart';
 import '../model/level_model.dart';
@@ -26,25 +25,30 @@ class StagePlay extends ChangeNotifier {
   bool showTapMassage = true;
   int _hScore = 0;
 
+  int fxPulse = 0;
+  int eatenAt = -1;
+  bool fxIsSpecial = false;
+
   bool _targetBroken = false;
   bool _hScoreBroken = false;
   bool _isAskedToMoveToNextLevel = false;
   bool showAskMenu = false;
 
-  late Timer gameTimer;
+  Timer? gameTimer;
+  Timer? _sfTimer;
 
   void gamePlay() {
-    Duration duration = Duration(milliseconds: KDefaultGameSpeed);
-    gameTimer = Timer.periodic(duration, (timer) {
-      if (Manager.gameOver || Manager.isPause || Manager.isChangeGameSpeed) {
+    if (gameTimer?.isActive ?? false) return;
+    gameTimer = Timer.periodic(
+        Duration(milliseconds: Manager.gameSpeed), (timer) {
+      if (Manager.isChangeGameSpeed) {
         timer.cancel();
-        if (gameTimer.isActive) gameTimer.cancel();
-        if (Manager.isChangeGameSpeed) {
-          duration = Duration(milliseconds: Manager.gameSpeed);
-          gamePlay();
-          Manager.isChangeGameSpeed = false;
-        }
-      } else {
+        gameTimer = null;
+        Manager.isChangeGameSpeed = false;
+        gamePlay();
+        return;
+      }
+      if (!Manager.gameOver && !Manager.isPause) {
         snake!.moving();
         _isaLife();
         _eating();
@@ -103,6 +107,7 @@ class StagePlay extends ChangeNotifier {
         GameSound.playSoundEffect(KEatFileSound);
         stage!.addScore();
         testingScoreAndHScore();
+        _triggerFx(false);
         if (type == FoodType.Food) {
           stage!.createFood(snake!.getBody(), Manager.giftFoods);
           break;
@@ -113,8 +118,15 @@ class StagePlay extends ChangeNotifier {
       case FoodType.SFood:
         stage!.eatingSFood();
         testingScoreAndHScore();
+        _triggerFx(true);
         break;
     }
+  }
+
+  void _triggerFx(bool special) {
+    eatenAt = snake!.getBody().last;
+    fxIsSpecial = special;
+    fxPulse++;
   }
 
   int stageCurrentScore() {
@@ -157,17 +169,16 @@ class StagePlay extends ChangeNotifier {
   }
 
   void checkAvailabilityForSpecialFood() {
-    if (!Manager.timerSFRun) {
-
-      Manager.timerSFRun = true;
-      Future.delayed(Duration(seconds: Random().nextInt(30) + 60), () {
-        _showSpecialFood();
-        // Manager.timerSFRun = false;
-      });
-    }
+    if (Manager.timerSFRun) return;
+    Manager.timerSFRun = true;
+    _sfTimer = Timer(Duration(seconds: Random().nextInt(30) + 60), () {
+      _sfTimer = null;
+      _showSpecialFood();
+    });
   }
 
   void _showSpecialFood() {
+    if (Manager.gameOver) return;
     if (!Manager.restartPressed) {
       if (!Manager.isPause) {
         while (snake!.getBody().contains(stage!.sFood) ||
@@ -177,6 +188,7 @@ class StagePlay extends ChangeNotifier {
             Manager.giftFoods.contains(stage!.sFood)) {
           stage!.sFood = Random().nextInt(GameSize.boxCount() - 1);
           Future.delayed(Duration(seconds: 15), () {
+            if (Manager.gameOver) return;
             if (!Manager.isSFoodEating) {
               stage!.sFood = GameSize.boxCount() + 1;
               Manager.timerSFRun = false;
@@ -196,6 +208,10 @@ class StagePlay extends ChangeNotifier {
   }
 
   void start(int levelID) {
+    gameTimer?.cancel();
+    gameTimer = null;
+    _sfTimer?.cancel();
+    _sfTimer = null;
     Manager.startGame();
     Manager.currentStageID = levelID;
     level = levelList[levelID];
@@ -214,7 +230,10 @@ class StagePlay extends ChangeNotifier {
   }
 
   void endGame() {
-    gameTimer.cancel();
+    gameTimer?.cancel();
+    gameTimer = null;
+    _sfTimer?.cancel();
+    _sfTimer = null;
     Manager.endGame();
     notifyListeners();
   }

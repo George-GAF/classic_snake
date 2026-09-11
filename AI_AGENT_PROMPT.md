@@ -58,9 +58,9 @@
 
 ### Assets
 - `assets/images/snakehead.png` (menu button image)
-- `assets/fonts/Mali-*.ttf` (6 weights: Regular, Medium, Bold, + Italic variants)
+- `assets/fonts/Mali-*.ttf` (6 weights: Regular, Medium, Bold, + Italic variants), `assets/fonts/Orbitron.ttf` (arcade display font)
 - SFX: `eat.wav`, `buttonClick.wav`; music/sfx: `snakebackgroundmusic.mp3`, `snakegameover.mp3`, `snakehieghscorebreak.mp3`, `snakescoredown.mp3`, `snakescoreup.mp3`, `snaketargetdone.mp3`
-- **Gotcha**: `pubspec.yaml` declares the font family as **`Mail`** while the files are `Mali-*` and code uses `fontFamily: 'Mail'` (`main.dart:50`). No font is actually registered under family `Mail`, so the Mali font is **never applied** — the app falls back to the default font. (Bug → fix would be renaming the family to `Mali`.)
+- **Fonts (fixed 2026-09-11)**: family is now registered as **`Mali`** with correct weights/styles (bug fix), plus a new **`Orbitron`** display font (`assets/fonts/Orbitron.ttf`, variable) for HUD numerals and titles. `GAFText` gained optional `glowColor` and `letterSpacing` params; `main.dart` `ThemeData` uses `fontFamily: 'Mali'`.
 
 ---
 
@@ -165,12 +165,17 @@ lib/
 ## 6. Widgets (lib/widget/ + gaf_package/)
 
 ### Game/widget rendering
-- `widget/cell/cell.dart` — builds a board cell for a `CellType`: blocks (blue circles on grey), snake segments (rounded bars), snake **head** (with eyes, oriented by direction), snake **corners**, food (green), special food (green with `?` icon). Uses `CellProp` + `RotatedBox(quarterTurns)` for rotation logic. **Colors here are largely hardcoded** (blue/green/grey), so the selectable color theme mostly affects chrome, not the playfield.
-- `widget/game_menu.dart` — the pause/game-over overlay (slide-up panel). Buttons: Continue (rewarded video for extra life), Resume/Restart, Option, Back To Main, Exit. Renders `AskToMoveNextLevel` when `showAskMenu`.
+- `widget/cell/cell.dart` — builds a board cell for a `CellType`: blocks (neon dots on dark), snake segments (rounded bars), snake **head** (with eyes, oriented by direction), snake **corners**, food (neon), special food (neon with `?` icon). Uses `CellProp` + `RotatedBox(quarterTurns)` + `AnimatedContainer`. **Since 2026-09-11 colors come from the active `AppColor` palette** (`snakeColor`, `foodColor`, `blockColor`, `glowColor`); the 5 neon themes now drive the playfield, not just chrome.
+- `widget/game_menu.dart` — the pause/game-over overlay: `BackdropFilter` blur scrim, slide-up neon panel, `Orbitron` glowing title, count-up score (via `AnimatedNumber`). Buttons: Continue (rewarded video for extra life), Resume/Restart, Option, Back To Main, Exit. Renders `AskToMoveNextLevel` when `showAskMenu`.
 - `widget/ask_to_move_next_level.dart` — congratulation dialog (emoji-heavy) to proceed to next level or keep playing current.
-- `widget/option_menu.dart` — AlertDialog: sound toggle, music toggle, color-theme dropdown (5 themes), Read Privacy Policy link (Google Sites URL).
-- `widget/play_screen_widget/top_section.dart` — banner ad, Level title, `TimerLine` (play time + reward countdown + settings button), `ScoreLine` (target/score/high-score). Settings button toggles pause + opens menu.
+- `widget/option_menu.dart` — AlertDialog (glow-bordered): sound toggle, music toggle, color-theme dropdown (5 neon themes), Read Privacy Policy link (Google Sites URL).
+- `widget/play_screen_widget/top_section.dart` — neon HUD panel: ad banner, LEVEL chip, `TimerLine` (play time + reward countdown + settings button), `ScoreLine` (TARGET/SCORE/HIGH badge chips with `AnimatedNumber` count-up). Settings button toggles pause + opens menu.
 - `widget/play_screen_widget/tap_to_play.dart` — full-screen "Tap to Play" overlay; first tap starts the game+clock.
+- `widget/neon_pressable.dart` — shared press feedback wrapper (scale-down + glow) used by `GAFButton`, `MainMenuButton`, `GAFRaisedButton`.
+- `widget/play_screen_widget/game_effects.dart` — particle burst + floating score/reward label overlay, keyed off `StagePlay.fxPulse`.
+- `widget/play_screen_widget/screen_shake.dart` — board shake on game-over rising edge.
+- `widget/play_screen_widget/neon_grid.dart` — `NeonGridPainter`, faint grid lines behind the playfield.
+- `helper/swipe.dart` — pure `resolveSwipe()` steering resolver (drag threshold + 180° reversal guard), unit-tested in `test/swipe_test.dart`.
 - `widget/stage_icon.dart` — level tile in the grid; reads unlock state (`LevelController(stageId-1).getLevelState()`), Survival always enabled, locked tiles dimmed.
 - `widget/main_menu_button.dart`, `gaf_button.dart`, `gaf_item.dart`, `gaf_text.dart`, `gaf_back_button.dart`, `gaf_rasid_button.dart`, `gaf_change_value_button.dart`, `gaf_dialog.dart`, `converted_icon.dart` (animated toggle icon), `snake_corner.dart`, `snake_eye.dart`, `stage_icon.dart`.
 
@@ -187,6 +192,9 @@ lib/
 - `ad_widget/banner_widget.dart` — `BannerAd`, keep-alive, 30s request throttle + 30s retry on failure.
 - `ad_widget/rewarded_Ad.dart` — rewarded-ad helper. **Flawed (see Known Issues).**
 
+> ### Visual language (Cyberpunk Neon, 2026-09-11)
+> Dark carbon backgrounds + neon accents; glow = `BoxShadow(color: glowColor, blur + spread)` on food/snake/buttons/panels. All 5 selectable palettes are neon variants (`appColorList`). `Orbitron` for HUD numerals/titles, `Mali` for body. Neon chips/panels replace the old dual-bevel pills. Game juice: eat particles + floating score (in `GameEffects`, keyed off `StagePlay.fxPulse`), board shake on death, `AnimatedNumber` score count-ups, press scale/glow on all buttons (`NeonPressable`), fade+slide route transitions (`NeonRoute` in `main.dart`), swipe steering via `helper/swipe.dart` (drag threshold `width*.015` + dominant axis + haptics).
+
 ---
 
 ## 7. Game Rules & Play Loop
@@ -198,7 +206,7 @@ lib/
 ### Snake
 - Starting body `[30, 50, 70, 90]`, starts moving `Down`, head = body.last (index 90).
 - Movement is **toroidal**: off the top wraps to bottom, off left wraps to rightmost of same row-line logic (`helper/snake.dart:101-133`).
-- Controlled by swipe anywhere on the play area: `PlayScreen.build`'s GestureDetector maps `onVerticalDragUpdate` / `onHorizontalDragUpdate` → `Direct.Up/Down/Left/Right`, forbidding a 180° reversal into the current direction.
+- Controlled by swipe anywhere over the play area: `SwipeSteer` (in `play_screen.dart`) feeds `helper/swipe.dart`'s `resolveSwipe()` — a turn fires only after the drag passes `GameSize().width()*.015` on the dominant axis (with a small `HapticFeedback`), forbidding a 180° reversal into the current direction.
 
 ### Main loop (`providers/stagePlay.dart`)
 - `StagePlay.gamePlay()` starts `Timer.periodic(Duration(milliseconds: Manager.gameSpeed))` (default 300ms = `KDefaultGameSpeed`).
@@ -251,19 +259,19 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 
 ## 9. Known Issues / Technical Debt (verified by code reading)
 
-1. **Broken widget test**: `test/widget_test.dart` is the untouched Flutter counter-template test; it pumps `MyApp()` and expects counter widgets that do not exist → it will fail. `integration_test/app_test.dart` and `driver.dart` are fully commented out. There are **no real tests** for game logic.
-2. **AppUpdate cast bug**: `app-update.dart:17` does `http.get(_getVersion as Uri)` where `_getVersion` is a `String` → runtime `TypeError` (String is not Uri). Version-check dialog can never work / may throw unhandled async error whenever `StageScreen` builds.
-3. **AppUpdate version compare bug**: `_haveLastVersion` compares components lexicographically (`last[i] <= current[i]` for each i) — wrong for e.g. `1.10.x` vs `2.0.x` mixed comparisons; fails to detect updates when a lower component is larger.
-4. **Rewarded ad race (reward leak)**: `rewarded_Ad.dart` calls `_loadAd()` and immediately `_rewardedAd?.show(...)`; the ad is loaded asynchronously, so `show()` typically runs on a still-null ad, and `isLoad` is captured before the load callback fires (always `false` → always shows "No Ad Available" toast). **The reward callback runs on `onUserEarnedReward` from the shown ad; `runReward(context)` in `game_menu.dart` grants the extra life regardless of whether an ad actually completed** — i.e. reward can be claimed without a watched ad. Also the ad is re-created on every call without caching.
-5. **Font family mismatch**: pubspec declares `family: Mail` but font files are `Mali-*` and `fontFamily: 'Mail'` is used → custom font silently never applies.
-6. **Theme only partially applied**: `Cell`, `SnakeCorner`, `PlayScreen` scaffold, food/block/special-food colors are hardcoded RGB values; the 5-color theme changes chrome (backgrounds, fonts, menu) but not the playfield. `AppColor.playStageColor` (indexed by CellType) is computed but basically unused.
+1. **Widget/game-logic tests** — counter-template `widget_test.dart` was **replaced 2026-09-11** by a neon-palette test; unit tests now exist for `resolveSwipe` (`swipe_test.dart`), `Snake` (movement/wrap/eat/die), `LevelController` (prefs), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` version compare, and `StagePlay` start/score/unlock paths. `integration_test/app_test.dart` and `driver.dart` remain fully commented out. Game-loop ticking itself is not yet driven under test.
+2. **AppUpdate cast bug** — **FIXED 2026-09-11**. `_getVersion` is now a typed `Uri` (single slash); fetch wrapped in `try/catch` (network error → no dialog, no crash); body cleaning checks `statusCode==200` and strips quotes only when present.
+3. **AppUpdate version compare bug** — **FIXED 2026-09-11**. `haveLastVersion` is a static numeric part-by-part compare (padded for unequal lengths, non-numeric segments ignored) — unit-tested.
+4. **Rewarded ad race (reward leak)** — **FIXED 2026-09-11**. `RewardedHelperAd` now preloads + caches one ad (`ensureLoaded()`, shared `Completer` guard, concurrency safe); `showAd` awaits the load and shows the cached ad; `runReward` can only fire inside `onUserEarnedReward` (i.e. after a real completed ad), and the ad is disposed on dismiss/fail-to-show.
+5. **Font family mismatch** — **FIXED 2026-09-11**. Registered as `Mali` + `Orbitron`; `main.dart` uses `fontFamily: 'Mali'`.
+6. **Theme only partially applied** — **FIXED 2026-09-11**. Playfield (`Cell`, `SnakeCorner`, `PlayScreen`, food/block/special-food) now reads `snakeColor`/`foodColor`/`blockColor`/`glowColor` from the active neon `AppColor`. `AppColor.playStageColor` remains unused/vestigial (keep in sync if the field is ever wired).
 7. **Global mutable state everywhere**: `Manager` is a static grab-bag (flags, speed, score, snake, blocks, food…), heavily mutated from models/helpers/screens. Makes logic order-dependent and hard to test; several resets (`endGame`, `startGame`) must be kept in sync manually.
-8. **Timer management fragility**: `gamePlay()` creates a fresh `Timer.periodic`; pause/resume/restart/speed-change paths re-create timers with cancel calls in multiple places (`stagePlay.dart:34-55`, `game_menu.dart`, `top_section.dart`), risking duplicate/ghost timers. Special-food spawn uses nested un-cancelled `Future.delayed`.
+8. **Timer management fragility** — **FIXED 2026-09-11**. Single `Timer? gameTimer` guarded by `isActive` in `gamePlay()` (no ghost timers from resume/speed-change/restart callers); pause idles instead of cancelling; only speed-change re-creates. Special-food spawn uses a cancellable `Timer? _sfTimer` (cancelled in `endGame`/`start`) and skips when `gameOver`; one nested 15s `Future.delayed` per candidate remains.
 9. **Level/data coupling**: `levelList` is a mutable global; `DesignLevel` overwrites `levelList[31]` at runtime. `Position` model exists but the game mostly works on raw indices (blocks/snake as `List<int>`).
 10. **Global `_dialogShow`** in `stages_screen.dart` is a file-level bool (not per-screen-instance): update+rating dialogs shown once per app lifetime by design.
-11. **`RewardedHelperAd`/`toast` "No Ad Available"** is triggered even when the ad is genuinely loading (see #4) — creates a worse UX.
+11. **`RewardedHelperAd`/`toast` "No Ad Available"** — **FIXED 2026-09-11**. The toast now fires only when a load actually fails (not while genuinely loading), falling out of the new load/cache/show flow (see #4).
 12. **Animal/flavor text**: `ask_to_move_next_level.dart` uses emoji in UI strings and a typo apostrophe `I'm` etc. App is **English-only** (RTL/Arabic not implemented despite skill guidelines — do not assume multilinguality).
-13. `AppUpdate` uses HTTP endpoint `...firebaseio.com//version.json` (double slash) — fragile but the cast bug in #2 prevents it from working anyway.
+13. **`AppUpdate` endpoint** — double slash `...//version.json` **FIXED 2026-09-11** (now `.../version.json`). Still plain-HTTP to `firebaseio.com` (accept that; do not add HTTPS pinning/TLS work unless asked).
 14. `loading_screen.dart` is dead code (registered route, never navigated to).
 15. **No secure upgrade path**: AdMob IDs and app/package IDs are hardcoded constants (fine for this project — do not "externalize" them into keys/config without being asked).
 
@@ -279,20 +287,23 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 - **No comments unless asked; follow existing formatting** (2-space indent, single quotes, trailing commas).
 - **Navigation**: named routes + `pushReplacementNamed` for game flow.
 - **Do not add dependencies** unless a genuine gap exists (rules: prefer Flutter/Dart APIs; verify Dart ≤ 3.5.4 compatibility).
-- **Testing**: before declaring a task done, add/run the smallest meaningful check. The repo currently lacks game-logic tests — adding unit tests for `Snake.move/eat/die`, `SpecialFood`, `LevelController`, or `StagePlay` ticks would be genuinely valuable (see Known Issues).
+- **Testing**: before declaring a task done, add/run the smallest meaningful check. Existing suite: neon-palette (`widget_test.dart`), `resolveSwipe` (`swipe_test.dart`), `Snake`, `LevelController`, `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` compare, `StagePlay` start/score/unlock — all headless. `GameSound` players are lazily constructed; disable sound (`GameSound.soundON=false`) before exercising paths that call `playSoundEffect`, and use `SharedPreferences.setMockInitialValues({})` + `TestWidgetsFlutterBinding.ensureInitialized()` for prefs/persistence tests.
 - Run `flutter analyze` before finishing; do not claim tests ran if they did not.
 
 ---
 
-## 11. Sugggested Improvement Order (if asked to work on the project)
+## 11. Suggested Improvement Order (if asked to work on the project)
 
-1. Fix the no-op/failing test files and add tiny unit tests for core logic (`Snake`, `SpecialFood`, `LevelController`, version comparison).
-2. Fix `AppUpdate` `as Uri` cast and naive version compare.
-3. Fix rewarded-ad flow (load → cache → show; only grant life inside `onUserEarnedReward` after a real ad).
-4. Fix font family name (`Mail` → `Mali`) or remove the broken registration.
-5. Consolidate timer creation/reset in `StagePlay` into one guarded lifecycle to avoid ghost timers.
-6. Decide whether global `Manager` state → provider/state class refactor is warranted (bigger change, do not do unprompted).
-7. Optionally apply the theme palette to playfield cells (currently hardcoded) if theme consistency is desired.
+> **2026-09-11 repair pass** resolved #2, #3, #4, #8, #11, #13 and added the game-logic test suite (see §9), plus the neon landing/level-editor sweep and the low-end knobs (`KMenuBlurSigma`, `KGlowStrength` in `constant.dart`).
+
+Remaining / next candidates:
+
+1. Decide whether global `Manager` state → provider/state class refactor is warranted (#7, bigger change — do not do unprompted).
+2. Drive the game-loop tick itself under a test (fakeAsync / pump) for `_eating`/`_isaLife`/special-food timing, incl. the surviving nested 15s `Future.delayed` in `_showSpecialFood` (#8 remnant).
+3. Level/data decoupling (#9): stop mutating global `levelList[31]`; the `Position` model is unused.
+4. Remove dead `loading_screen.dart` route + `main.dart` registrations (#14).
+5. Flavor-text cleanup (#12): emoji in `ask_to_move_next_level.dart`, apostrophe typo.
+6. On-screen D-pad (marketing) or landing/editor art pass if demanded; else keep swipe-only.
 
 ---
 

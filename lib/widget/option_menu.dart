@@ -21,20 +21,26 @@ class OptionMenu extends StatelessWidget {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_width * .06),
+            side: BorderSide(
+              color: color.getColors().glowColor.withOpacity(.4),
+            ),
           ),
-          actionsPadding: EdgeInsets.all(_width * .02),
-          buttonPadding: EdgeInsets.all(0),
           backgroundColor: color.getColors().basicColor,
+          scrollable: true,
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: _width * .02, vertical: 4),
           title: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GAFText(
-                    'Game Option',
-                    textAlign: TextAlign.center,
-                    fontSize: _width * .06,
-                    fontWeight: FontWeight.w900,
+                  Flexible(
+                    child: GAFText(
+                      'Game Option',
+                      textAlign: TextAlign.center,
+                      fontSize: _width * .06,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   InkWell(
                     onTap: () {
@@ -57,108 +63,134 @@ class OptionMenu extends StatelessWidget {
               ),
             ],
           ),
-          actions: [
-            GAFItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GAFText(
-                    GameSound.soundState,
-                    fontSize: _width * .05,
-                  ),
-                  ConvertIcon(
-                    onPressed: () {
-                      Provider.of<GameSound>(context, listen: false)
-                          .switchSoundState();
-                    },
-                    milliseconds: 200,
-                    switchValue:
-                        Provider.of<GameSound>(context).getSoundState(),
-                    onIcon: Icons.volume_up_rounded,
-                    offIcon: Icons.volume_mute_rounded,
-                  ),
-                ],
-              ),
-              paddingH: _width * .06,
-              radius: _width * .02,
-            ),
-            GAFItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GAFText(
-                    GameSound.musicState,
-                    fontSize: _width * .05,
-                  ),
-                  ConvertIcon(
-                    onPressed: () {
-                      Provider.of<GameSound>(context, listen: false)
-                          .switchMusicState();
-                    },
-                    milliseconds: 200,
-                    switchValue:
-                        Provider.of<GameSound>(context).getMusicState(),
-                    onIcon: Icons.music_note_rounded,
-                    offIcon: Icons.music_off_rounded,
-                  ),
-                ],
-              ),
-              paddingH: _width * .06,
-              radius: _width * .02,
-            ),
-            GAFItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GAFText(
-                    'Choose Color :',
-                    fontSize: _width * .05,
-                  ),
-                  DropdownButton<String>(
-                    style: TextStyle(
-                      color: color.getColors().fontColor,
+          actions: const [],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GAFItem(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GAFText(
+                        GameSound.soundState,
+                        fontSize: _width * .05,
+                        softWrap: false,
+                      ),
                     ),
-                    dropdownColor: color.getColors().basicColor,
-                    value: color.getSelectedColor(),
-                    onChanged: (value) {
-                      int i = color.colorList().indexOf(value!);
-                      color.setSelectedColor(i);
-                    },
-                    items: color
-                        .colorList()
-                        .map<DropdownMenuItem<String>>(
-                            (e) => DropdownMenuItem<String>(
-                                  value: e,
-                                  child: GAFText(
-                                    e,
-                                    fontSize: _width * .05,
-                                  ),
-                                ))
-                        .toList(),
-                  ),
-                ],
-              ),
-              paddingH: _width * .06,
-              radius: _width * .02,
-            ),
-            GAFItem(
-              child: TextButton(
-                onPressed: () {
-                  _launchURL('https://sites.google.com/view/privacypolicyclassicsnake/home');
-                },
-                child: GAFText(
-                  'Read Privacy Policy',
-                  fontSize: _width * .05,
-                  fontWeight: FontWeight.bold,
+                    SizedBox(
+                      width: _width * .02,
+                    ),
+                    ConvertIcon(
+                      onPressed: () {
+                        Provider.of<GameSound>(context, listen: false)
+                            .switchSoundState();
+                      },
+                      milliseconds: 200,
+                      switchValue:
+                          Provider.of<GameSound>(context).getSoundState(),
+                      onIcon: Icons.volume_up_rounded,
+                      offIcon: Icons.volume_mute_rounded,
+                    ),
+                  ],
                 ),
+                paddingH: _width * .06,
+                radius: _width * .02,
               ),
-              paddingH: _width * .06,
-              radius: _width * .02,
-            ),
-            SizedBox(
-              height: _height * .015,
-            )
-          ],
+              GAFItem(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GAFText(
+                        GameSound.musicState,
+                        fontSize: _width * .05,
+                        softWrap: false,
+                      ),
+                    ),
+                    SizedBox(
+                      width: _width * .02,
+                    ),
+                    ConvertIcon(
+                      onPressed: () {
+                        Provider.of<GameSound>(context, listen: false)
+                            .switchMusicState();
+                      },
+                      milliseconds: 200,
+                      switchValue:
+                          Provider.of<GameSound>(context).getMusicState(),
+                      onIcon: Icons.music_note_rounded,
+                      offIcon: Icons.music_off_rounded,
+                    ),
+                  ],
+                ),
+                paddingH: _width * .06,
+                radius: _width * .02,
+              ),
+              GAFItem(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GAFText(
+                        'Colors :',
+                        fontSize: _width * .05,
+                        softWrap: false,
+                      ),
+                    ),
+                    SizedBox(
+                      width: _width * .02,
+                    ),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: DropdownButton<String>(
+                          style: TextStyle(
+                            color: color.getColors().fontColor,
+                          ),
+                          dropdownColor: color.getColors().basicColor,
+                          value: color.getSelectedColor(),
+                          onChanged: (value) {
+                            int i = color.colorList().indexOf(value!);
+                            color.setSelectedColor(i);
+                          },
+                          items: color
+                              .colorList()
+                              .map<DropdownMenuItem<String>>(
+                                  (e) => DropdownMenuItem<String>(
+                                        value: e,
+                                        child: GAFText(
+                                          e,
+                                          fontSize: _width * .05,
+                                        ),
+                                      ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                paddingH: _width * .06,
+                radius: _width * .02,
+              ),
+              GAFItem(
+                child: TextButton(
+                  onPressed: () {
+                    _launchURL(
+                        'https://sites.google.com/view/privacypolicyclassicsnake/home');
+                  },
+                  child: GAFText(
+                    'Read Privacy Policy',
+                    fontSize: _width * .05,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                paddingH: _width * .06,
+                radius: _width * .02,
+              ),
+              SizedBox(
+                height: _height * .015,
+              )
+            ],
+          ),
         );
       },
     );

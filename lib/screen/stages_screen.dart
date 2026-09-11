@@ -51,6 +51,7 @@ class StageScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       fontWeight: FontWeight.w900,
                       fontSize: width * .1,
+                      glowColor: color.getColors().glowColor,
                     )),
                   ],
                 ),
@@ -58,15 +59,24 @@ class StageScreen extends StatelessWidget {
                   child: Stack(
                     children: [
                       Container(
-                        color: Colors.white.withOpacity(.7),
+                        color: color.getColors().glowColor.withOpacity(.04),
                       ),
                       Container(
                         width: double.infinity,
                         height: double.infinity,
                         margin: EdgeInsets.all(width * .05),
                         decoration: BoxDecoration(
-                          color: color.getColors().basicColor.withAlpha(-30),
+                          color: color.getColors().menuColor.withOpacity(.25),
                           borderRadius: BorderRadius.circular(width * .05),
+                          border: Border.all(
+                              color:
+                                  color.getColors().glowColor.withOpacity(.3)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.getColors().glowColor.withOpacity(.15),
+                              blurRadius: width * .03,
+                            ),
+                          ],
                         ),
                         child: Column(
                           children: [

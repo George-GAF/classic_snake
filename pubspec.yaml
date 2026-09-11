@@ -51,12 +51,21 @@ flutter:
     - assets/
     - assets/images/
   fonts:
-    - family: Mail
+    - family: Mali
       fonts:
-        - asset: assets/fonts/Mali-Bold.ttf
-        - asset: assets/fonts/Mali-BoldItalic.ttf
-        - asset: assets/fonts/Mali-Italic.ttf
-        - asset: assets/fonts/Mali-Medium.ttf
-        - asset: assets/fonts/Mali-MediumItalic.ttf
         - asset: assets/fonts/Mali-Regular.ttf
-          weight: 900
+        - asset: assets/fonts/Mali-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Mali-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Mali-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Mali-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Mali-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: Orbitron
+      fonts:
+        - asset: assets/fonts/Orbitron.ttf

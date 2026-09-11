@@ -21,8 +21,6 @@ class TapToPlay extends StatelessWidget {
         ? GestureDetector(
             onTap: () {
               if (!Manager.gameRun && !Manager.gameOver) {
-                // todo: add level speed
-                //context.read<StagePlay>().endGame();
                 context.read<StagePlay>().hideTapMassage();
                 context.read<StagePlay>().gamePlay();
                 Manager.gameRun = true;
@@ -35,16 +33,34 @@ class TapToPlay extends StatelessWidget {
               alignment: AlignmentDirectional.center,
               color: Provider.of<AppColorController>(context)
                   .getColors()
-                  .menuColor
-                  .withOpacity(.3),
-              child: GAFText(
-                'Tap to Play',
-                fontSize: width * .20,
-                textAlign: TextAlign.center,
-                fontWeight: FontWeight.w900,
-                colorOpacity: .7,
-                softWrap: true,
-                shadows: [],
+                  .basicColor
+                  .withOpacity(.55),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GAFText(
+                    'Tap to Play',
+                    fontSize: width * .14,
+                    textAlign: TextAlign.center,
+                    fontWeight: FontWeight.w900,
+                    colorOpacity: .95,
+                    softWrap: true,
+                    glowColor:
+                        Provider.of<AppColorController>(context).getColors().glowColor,
+                    shadows: [],
+                  ),
+                  SizedBox(
+                    height: height * .02,
+                  ),
+                  GAFText(
+                    'Swipe anywhere to steer',
+                    fontSize: width * .04,
+                    textAlign: TextAlign.center,
+                    colorOpacity: .7,
+                    softWrap: true,
+                    shadows: [],
+                  ),
+                ],
               ),
             ),
           )

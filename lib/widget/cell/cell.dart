@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/stagePlay.dart';
+import '../../constant/constant.dart';
 import '../../constant/enum_file.dart';
+import '../../model/color_app.dart';
+import '../../view_model/app_color.dart';
 import '../../view_model/game_size.dart';
 import '../../view_model/manager.dart';
 import '../snake_corner.dart';
@@ -40,16 +43,29 @@ class Cell extends StatelessWidget {
 
 //------------------- helper part --------------------------
 
-List<BoxShadow> _shadowList(double space) {
+List<BoxShadow> _shadowList(AppColor colors, double space) {
   return [
     BoxShadow(
-      color: Color.fromRGBO(71, 120, 254, 1),
+      color: colors.darkShadow,
       offset: Offset(space, space),
     ),
     BoxShadow(
-      color: Color.fromRGBO(50, 50, 50, .7),
+      color: colors.lightShadow,
       offset: Offset(-space, -space),
     )
+  ];
+}
+
+List<BoxShadow> _neonShadows(AppColor colors, double space, double glow) {
+  final strength = KGlowStrength;
+  return [
+    ..._shadowList(colors, space),
+    if (glow != 0 && strength > 0)
+      BoxShadow(
+        color: colors.glowColor.withOpacity(.35 * strength),
+        blurRadius: _cellSize * .8 * strength,
+        spreadRadius: _cellSize * .12 * strength,
+      ),
   ];
 }
 
@@ -62,7 +78,7 @@ class CellProp {
   int angle = 0;
 
   CellProp(BuildContext context, CellType cellType, int id) {
-    // var colors = context.watch<AppColorController>();
+    var colors = context.watch<AppColorController>().getColors();
     double? _space;
     double? _radius;
     // -------------------------------- blocks
@@ -72,21 +88,22 @@ class CellProp {
         width: _cellSize / 2,
         height: _cellSize / 2,
         decoration: BoxDecoration(
-          color: Color.fromRGBO(71, 120, 254, 1),
+          color: colors.glowColor,
           borderRadius: BorderRadius.circular(_cellSize * .5),
         ),
       );
 
       decoration = BoxDecoration(
-        color: Color.fromRGBO(67, 67, 67, 1),
+        color: colors.blockColor,
         borderRadius: BorderRadius.circular(0),
-        boxShadow: _shadowList(_space),
+        boxShadow: _neonShadows(colors, _space, 0),
       );
       //------------------------------- snake
     } else if (CellType.Snake == cellType) {
       var snake = context.watch<StagePlay>().snake!.getBody();
-      Color color =
-          Manager.isMustChangeSnakeColor ? Colors.blue : Colors.white70;
+      Color color = Manager.isMustChangeSnakeColor
+          ? colors.foodColor
+          : colors.snakeColor;
       int index = snake.indexOf(id);
       angle = 0;
       if (snake.last == id) {
@@ -111,7 +128,7 @@ class CellProp {
         decoration = BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(_cellSize / 2),
-          boxShadow: _shadowList(_space),
+          boxShadow: _neonShadows(colors, _space, _space),
         );
       } else if (snake[0] != id &&
           isCorner(snake[index - 1], snake[index + 1])) {
@@ -137,7 +154,7 @@ class CellProp {
         decoration = BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(_cellSize / 6),
-          boxShadow: _shadowList(_space),
+          boxShadow: _neonShadows(colors, _space, _space),
         );
       }
     } else if (CellType.Food == cellType) {
@@ -145,9 +162,9 @@ class CellProp {
       _radius = _cellSize / 6;
       margin = EdgeInsets.all(_cellSize / 4);
       decoration = BoxDecoration(
-        color: Color.fromRGBO(0, 255, 0, 1),
+        color: colors.foodColor,
         borderRadius: BorderRadius.circular(_radius),
-        boxShadow: _shadowList(_space),
+        boxShadow: _neonShadows(colors, _space, _space),
       );
     } else if (CellType.SpecialFood == cellType) {
       _radius = _cellSize / 2;
@@ -157,8 +174,9 @@ class CellProp {
         color: Colors.white,
       );
       decoration = BoxDecoration(
-        color: Color.fromRGBO(0, 255, 0, 1),
+        color: colors.foodColor,
         borderRadius: BorderRadius.circular(_radius),
+        boxShadow: _neonShadows(colors, _cellSize * .12, _cellSize * .15),
       );
       //----------------- Ground
     }

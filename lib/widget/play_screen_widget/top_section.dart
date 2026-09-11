@@ -32,27 +32,179 @@ class TopPart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var isReward = context.watch<StagePlay>().stage!.reward != '';
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: width * .012),
+    var colors = context.watch<AppColorController>().getColors();
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: width * .02),
+      decoration: BoxDecoration(
+        color: colors.menuColor.withOpacity(.35),
+        borderRadius: BorderRadius.circular(width * .035),
+        border: Border.all(color: colors.glowColor.withOpacity(.35)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.glowColor.withOpacity(.18),
+            blurRadius: width * .03,
+          ),
+        ],
+      ),
+      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: width * .015),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           BannerWidget(),
-          GAFText(
-            'Level : $title',
-            fontWeight: FontWeight.w900,
-            fontSize: fontSize * 1.1, //width * .04,
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _HudChip(
+                label: 'LEVEL',
+                value: '$title',
+                size: fontSize * 1.1,
+              ),
+            ],
           ),
           TimerLine(
             isReward: isReward,
           ),
-          ScoreLine(/*stage: stage, level: level*/),
-          const SizedBox(
-            height: 5,
-          )
+          ScoreLine(),
+          const SizedBox(height: 4),
         ],
       ),
+    );
+  }
+}
+
+class _HudChip extends StatelessWidget {
+  final String? label;
+  final String? value;
+  final double? size;
+
+  const _HudChip({this.label, this.value, this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    var colors = context.watch<AppColorController>().getColors();
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: width * .03, vertical: height * .003),
+      decoration: BoxDecoration(
+        color: colors.basicColor.withOpacity(.7),
+        borderRadius: BorderRadius.circular(width * .02),
+        border: Border.all(color: colors.glowColor.withOpacity(.4)),
+      ),
+      child: GAFText(
+        value,
+        fontSize: size ?? fontSize,
+        fontWeight: FontWeight.w900,
+        glowColor: colors.glowColor,
+        colors: colors.fontColor,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _HudBadge extends StatelessWidget {
+  final Color accent;
+  final String label;
+  final String value;
+  final bool bold;
+
+  const _HudBadge({
+    required this.accent,
+    required this.label,
+    required this.value,
+    this.bold = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    var colors = context.watch<AppColorController>().getColors();
+    return Flexible(
+      fit: FlexFit.loose,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+            horizontal: width * .02, vertical: height * .002),
+        decoration: BoxDecoration(
+          color: colors.menuColor.withOpacity(.5),
+          borderRadius: BorderRadius.circular(width * .02),
+          border: Border.all(color: accent.withOpacity(.55)),
+          boxShadow: [
+            BoxShadow(
+              color: accent.withOpacity(.25),
+              blurRadius: width * .02,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GAFText(
+              label,
+              fontSize: fontSize * .75,
+              colorOpacity: .7,
+            ),
+            AnimatedNumber(
+              target: value,
+              bold: bold,
+              accent: accent,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AnimatedNumber extends StatefulWidget {
+  final String target;
+  final bool bold;
+  final Color accent;
+
+  const AnimatedNumber({
+    super.key,
+    required this.target,
+    required this.bold,
+    required this.accent,
+  });
+
+  @override
+  _AnimatedNumberState createState() => _AnimatedNumberState();
+}
+
+class _AnimatedNumberState extends State<AnimatedNumber> {
+  int _from = 0;
+
+  @override
+  void didUpdateWidget(covariant AnimatedNumber old) {
+    super.didUpdateWidget(old);
+    if (old.target != widget.target) {
+      _from = int.tryParse(old.target) ?? _from;
+    }
+  }
+
+  int get _to => int.tryParse(widget.target) ?? 0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_to == _from) {
+      return _text('${widget.target}');
+    }
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: _from.toDouble(), end: _to.toDouble()),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      builder: (_, v, __) => _text('${v.round()}'),
+    );
+  }
+
+  Widget _text(String text) {
+    final colors = context.watch<AppColorController>().getColors();
+    return GAFText(
+      text,
+      fontSize: fontSize,
+      fontWeight: widget.bold ? FontWeight.w900 : FontWeight.normal,
+      glowColor: widget.accent,
+      colors: widget.bold ? colors.fontColor : null,
     );
   }
 }
@@ -71,16 +223,13 @@ class TimerLine extends StatelessWidget {
       children: [
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          //crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GAFText(
               'play time : ${GameTimer.showTimer()}',
-              fontSize: fontSize, //width * .04,
+              fontSize: fontSize,
             ),
-            SizedBox(
-              height: width * .03,
-            ),
-            isReward ? Reward() : SizedBox.shrink(),
+            isReward ? SizedBox(height: width * .01) : const SizedBox.shrink(),
+            isReward ? Reward() : const SizedBox.shrink(),
           ],
         ),
         const GameSettingButton(),
@@ -100,21 +249,19 @@ class GameSettingButton extends StatelessWidget {
       builder: (cont, color, child) {
         return Container(
           decoration: BoxDecoration(
-            color: color.getColors().basicColor,
-            borderRadius: BorderRadius.circular(50),
+            color: color.getColors().menuColor,
+            borderRadius: BorderRadius.circular(width * .03),
+            border:
+                Border.all(color: color.getColors().glowColor.withOpacity(.5)),
             boxShadow: [
               BoxShadow(
-                  color: color.getColors().lightShadow,
-                  offset: Offset(-1, -1),
-                  blurRadius: 3),
-              BoxShadow(
-                  color: color.getColors().darkShadow,
-                  offset: Offset(1, 1),
-                  blurRadius: 3)
+                color: color.getColors().glowColor.withOpacity(.35),
+                blurRadius: width * .02,
+              ),
             ],
           ),
           child: Container(
-            padding: EdgeInsets.all(avaWidth * .015),
+            padding: EdgeInsets.all(avaWidth * .01),
             child: InkWell(
               onTap: () {
                 Manager.isPause = !Manager.isPause;
@@ -126,7 +273,7 @@ class GameSettingButton extends StatelessWidget {
               child: Icon(
                 Manager.sendToBackground ? Icons.pause : Icons.settings,
                 color: color.getColors().fontColor,
-                size: avaWidth * .08,
+                size: avaWidth * .07,
               ),
             ),
           ),
@@ -139,57 +286,41 @@ class GameSettingButton extends StatelessWidget {
 class ScoreLine extends StatelessWidget {
   const ScoreLine({
     super.key,
-    // required this.stage,
-    // required this.level,
   });
-/*
-  final LevelModel? stage;
-  final LevelController? level;
-*/
+
   @override
   Widget build(BuildContext context) {
     var stage = context.watch<StagePlay>().level;
-    var level = context.watch<StagePlay>().controller;
-    var child = stage?.rank != 0
-        ? GAFText(
-            'Target : ${stage?.targetScore} ',
-            fontSize: fontSize, //width * .04,
-          )
-        : SizedBox();
+    var data = context.watch<StagePlay>();
+    var colors = context.watch<AppColorController>().getColors();
+    var score = '${data.stageCurrentScore()}';
+    var isBroken = data.isTargetBroken();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        child,
-        SizedBox(
-          width: stage?.rank != 0 ? width * .04 : 0,
-        ),
-        Consumer<StagePlay>(
-          builder: (cont, data, child) {
-            var isBroken = data.isTargetBroken();
-            var fWeight = isBroken ? FontWeight.w900 : FontWeight.normal;
-            var color = isBroken && stage!.rank != 0 ? Colors.green[900] : null;
-            return GAFText(
-              'Score : ${data.stageCurrentScore()}',
-              fontSize: fontSize, // width * .04,
-              fontWeight: fWeight,
-              colors: color,
-            );
-          },
-        ),
-        SizedBox(
-          width: width * .04,
+        if (stage?.rank != 0)
+          _HudBadge(
+            accent: colors.glowColor,
+            label: 'TARGET',
+            value: '${stage!.targetScore}',
+          ),
+        _HudBadge(
+          accent: isBroken && stage?.rank != 0 ? colors.glowColor : colors.foodColor,
+          label: 'SCORE',
+          value: score,
+          bold: isBroken,
         ),
         FutureBuilder(
           builder: (_, hScore) {
-            context.watch<StagePlay>().readHScore(hScore.data ?? 0);
-            return GAFText(
-              'High Score : ${(hScore.data ?? 0)}',
-              fontSize: width * .04,
-              fontWeight: FontWeight.w900,
+            context.read<StagePlay>().readHScore(hScore.data ?? 0);
+            return _HudBadge(
+              accent: colors.glowColor,
+              label: 'HIGH',
+              value: '${hScore.data ?? 0}',
             );
           },
-          future: level?.getLevelHighScore(),
+          future: context.read<StagePlay>().controller?.getLevelHighScore(),
         ),
       ],
     );
@@ -204,23 +335,47 @@ class Reward extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var stage = context.watch<StagePlay>().stage;
-    return Row(
-      children: [
-        GAFText(
-          stage!.reward,
-          fontWeight: FontWeight.w900,
-          fontSize: fontSize, // width * .04,
-          softWrap: true,
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: width * .02, vertical: height * .002),
+      decoration: BoxDecoration(
+        color: context
+            .watch<AppColorController>()
+            .getColors()
+            .glowColor
+            .withOpacity(.15),
+        borderRadius: BorderRadius.circular(width * .02),
+        border: Border.all(
+          color: context
+              .watch<AppColorController>()
+              .getColors()
+              .glowColor
+              .withOpacity(.5),
         ),
-        const SizedBox(
-          width: 5,
-        ),
-        GAFText(
-          '${stage.sec == 0 ? '' : stage.sec}',
-          fontWeight: FontWeight.w900,
-          fontSize: fontSize, // width * .04,
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GAFText(
+            stage!.reward,
+            fontWeight: FontWeight.w900,
+            fontSize: fontSize,
+            softWrap: true,
+            glowColor: context
+                .watch<AppColorController>()
+                .getColors()
+                .glowColor,
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          GAFText(
+            '${stage.sec == 0 ? '' : stage.sec}',
+            fontWeight: FontWeight.w900,
+            fontSize: fontSize,
+          ),
+        ],
+      ),
     );
   }
 }

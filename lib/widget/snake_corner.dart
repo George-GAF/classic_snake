@@ -1,5 +1,8 @@
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../model/color_app.dart';
+import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 
 class SnakeCorner extends StatelessWidget {
@@ -13,8 +16,9 @@ class SnakeCorner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColor colors =
+        context.watch<AppColorController>().getColors();
     double space = GameSize().cellSize() * .12;
-    //var colors = context.watch<AppColorController>().getColors();
     return Stack(
       children: [
         Container(
@@ -24,19 +28,24 @@ class SnakeCorner extends StatelessWidget {
               borderRadius: corner,
               boxShadow: [
                 BoxShadow(
-                  color: Color.fromRGBO(71, 120, 254, 1),
+                  color: colors.darkShadow,
                   offset: Offset(space, space),
                 ),
                 BoxShadow(
-                  color: Color.fromRGBO(50, 50, 50, .7),
+                  color: colors.lightShadow,
                   offset: Offset(-space, -space),
+                ),
+                BoxShadow(
+                  color: colors.glowColor.withOpacity(.3),
+                  blurRadius: GameSize().cellSize() * .6,
+                  spreadRadius: GameSize().cellSize() * .1,
                 ),
               ]),
         ),
         Container(
           margin: backMargin,
           decoration: BoxDecoration(
-            color: Color.fromRGBO(71, 148, 254, .7),
+            color: colors.glowColor.withOpacity(.5),
             borderRadius: corner,
           ),
         ),

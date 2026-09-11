@@ -8,3 +8,5 @@ const KGoodLuckFileSound = 'snakescoreup.mp3';
 const KTargetDoneFileSound = 'snaketargetdone.mp3';
 const KAppName = 'Snake Classic';
 const KCurrentAppVersion = '3.0.1';
+const KMenuBlurSigma = 4.0; //ponytail: low-end perf guard, drop to 0 if blur janks
+const KGlowStrength = 1.0; //ponytail: reduce to ~0.3 on low-end devices if glow janks

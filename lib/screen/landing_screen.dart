@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../view_model/app_color.dart';
 import '../view_model/level_controller.dart';
 import '../view_model/manager.dart';
+import '../widget/gaf_text.dart';
 import 'menu_screen.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -15,26 +18,25 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen>
     with WidgetsBindingObserver {
-  String _gaf = 'GAF';
+  String _gaf = 'SNAKE';
   int charInd = -1;
-  String _programing = '- Programing';
+  String _programing = 'CYBER CRAWL';
   int charIndS = -1;
   String _curPOne = '';
   String _curPTwo = '';
-  Color w = Colors.white;
-  Color b = Color.fromRGBO(12, 12, 12, 1);
+  Timer? _titleTimer;
+  bool _glow = false;
   double padding = 0;
   double corner = 0;
 
   void _writeTitle() {
     Duration duration = Duration(milliseconds: 100);
-    Timer.periodic(duration, (timer) {
+    _titleTimer = Timer.periodic(duration, (timer) {
       if (_gaf.length == _curPOne.length) {
         if (_programing.length == _curPTwo.length) {
-          if (w == Colors.white) {
+          if (!_glow) {
             setState(() {
-              w = Color.fromRGBO(12, 12, 12, 1);
-              b = Colors.white;
+              _glow = true;
             });
           } else {
             if (padding == 0) {
@@ -49,9 +51,6 @@ class _LandingScreenState extends State<LandingScreen>
               } else {
                 timer.cancel();
                 Future.delayed(Duration(milliseconds: 500), () {
-                  //GameSize.width = MediaQuery.of(context).size.width;
-                  //GameSize.height = MediaQuery.of(context).size.height;
-                  //GameSize.calcWideScreen();
                   Navigator.pushReplacementNamed(context, MenuScreen.routeName);
                 });
               }
@@ -80,42 +79,80 @@ class _LandingScreenState extends State<LandingScreen>
   }
 
   @override
+  void dispose() {
+    _titleTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Manager.screenAdjust();
+    final colors = context.watch<AppColorController>().getColors();
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Color.fromRGBO(12, 12, 12, 1),
+      backgroundColor: colors.basicColor,
       body: Container(
         alignment: AlignmentDirectional.center,
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: 500),
-              padding: EdgeInsets.all(padding),
-              decoration: BoxDecoration(
-                color: b,
-                borderRadius: BorderRadius.circular(corner),
-              ),
-              child: Text(
-                _curPOne,
-                style: TextStyle(
-                  color: w,
-                  fontWeight: FontWeight.bold,
-                  fontSize: width * .07,
-                ),
-              ),
+            GAFText(
+              'GAF- Programing',
+              colors: colors.fontColor,
+              fontSize: width * .03,
+              fontFamily: 'Orbitron',
+              letterSpacing: 3,
             ),
             SizedBox(
-              width: 5,
+              height: height * .015,
             ),
-            Container(
-              child: Text(
-                _curPTwo,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: width * .07,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * .02),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      padding: EdgeInsets.all(padding),
+                      decoration: BoxDecoration(
+                        color: colors.menuColor,
+                        borderRadius: BorderRadius.circular(corner),
+                        border: Border.all(
+                            color: colors.glowColor.withOpacity(_glow ? .9 : .35)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.glowColor.withOpacity(_glow ? .55 : .2),
+                            blurRadius: _glow ? 18 : 8,
+                            spreadRadius: _glow ? 2 : 0,
+                          ),
+                        ],
+                      ),
+                      child: GAFText(
+                        _curPOne,
+                        colors: colors.fontColor,
+                        glowColor: colors.glowColor,
+                        fontSize: width * .07,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Orbitron',
+                        letterSpacing: 4,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    GAFText(
+                      _curPTwo,
+                      colors: colors.fontColor,
+                      glowColor: colors.glowColor,
+                      fontSize: width * .07,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Orbitron',
+                      letterSpacing: 4,
+                    ),
+                  ],
                 ),
               ),
             ),

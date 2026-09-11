@@ -4,10 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/color_app.dart';
 
 class AppColorController extends ChangeNotifier {
-  List<String> _themeName = ['Blue', 'Red', 'Green', 'Light', 'Dark'];
+  List<String> _themeName = [
+    'Neon Blue',
+    'Neon Red',
+    'Neon Green',
+    'Neon Cyan',
+    'Neon Violet'
+  ];
   AppColor _current = blueColor;
   int index = 0;
-  String _selectedColor = 'Blue';
+  String _selectedColor = 'Neon Blue';
   static const String _indexColorKey = 'colorKey';
 
   void applyColors() async {

@@ -11,10 +11,9 @@ class GAFItem extends StatelessWidget {
   final double? paddingH;
   final double? radius;
 
-  final offSh = GameSize().width() * .009;
-
   @override
   Widget build(BuildContext context) {
+    var colors = Provider.of<AppColorController>(context).getColors();
     return Container(
       alignment: AlignmentDirectional.center,
       padding: EdgeInsets.symmetric(vertical: paddingV ?? 10),
@@ -23,25 +22,16 @@ class GAFItem extends StatelessWidget {
       child: child,
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-          color:
-              Provider.of<AppColorController>(context).getColors().basicColor,
-          boxShadow: [
-            BoxShadow(
-              color: Provider.of<AppColorController>(context)
-                  .getColors()
-                  .darkShadow,
-              offset: Offset(offSh, offSh),
-              blurRadius: GameSize().width() * .01,
-            ),
-            BoxShadow(
-              color: Provider.of<AppColorController>(context)
-                  .getColors()
-                  .lightShadow,
-              offset: Offset(-offSh, -offSh),
-              blurRadius: GameSize().width() * .01,
-            ),
-          ],
-          borderRadius: BorderRadius.circular(radius ?? 50)),
+        color: colors.menuColor.withOpacity(.5),
+        borderRadius: BorderRadius.circular(radius ?? 50),
+        border: Border.all(color: colors.glowColor.withOpacity(.25)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.glowColor.withOpacity(.12),
+            blurRadius: GameSize().width() * .02,
+          ),
+        ],
+      ),
     );
   }
 }

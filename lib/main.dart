@@ -47,8 +47,10 @@ class MyApp extends StatelessWidget  {
       title: 'Snake Game',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: 'Mail',
-        textTheme: TextTheme(bodyLarge: TextStyle(color: Colors.white)),
+        brightness: Brightness.dark,
+        fontFamily: 'Mali',
+        fontFamilyFallback: const ['Mali'],
+        textTheme: const TextTheme(bodyLarge: TextStyle(color: Colors.white)),
       ),
       home: FutureBuilder(
         builder: (context , builder) {
@@ -63,6 +65,47 @@ class MyApp extends StatelessWidget  {
         LandingScreen.routeName: (context) => LandingScreen(),
         DesignLevel.routeName: (context) => DesignLevel(),
       },
+      onGenerateRoute: (settings) {
+        final builders = <String, WidgetBuilder>{
+          MenuScreen.routeName: (context) => MenuScreen(),
+          PlayScreen.routeName: (context) => PlayScreen(),
+          LoadingScreen.routeName: (context) => LoadingScreen(),
+          StageScreen.routeName: (context) => StageScreen(),
+          LandingScreen.routeName: (context) => LandingScreen(),
+          DesignLevel.routeName: (context) => DesignLevel(),
+        };
+        final builder = builders[settings.name];
+        if (builder != null) {
+          return NeonRoute(builder: builder, settings: settings);
+        }
+        return null;
+      },
     );
   }
+}
+
+class NeonRoute extends PageRouteBuilder {
+  NeonRoute({required WidgetBuilder builder, required RouteSettings settings})
+      : super(
+          settings: settings,
+          transitionDuration: const Duration(milliseconds: 280),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              Builder(builder: builder),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+            return FadeTransition(
+              opacity: CurvedAnimation(parent: curved, curve: Curves.easeOut),
+              child: SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, .05), end: Offset.zero)
+                    .animate(curved),
+                child: child,
+              ),
+            );
+          },
+        );
 }

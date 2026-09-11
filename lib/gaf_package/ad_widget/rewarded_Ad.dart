@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
@@ -15,61 +17,55 @@ class RewardedHelperAd {
   }
 
   RewardedAd? _rewardedAd;
-  bool _loadAd() {
-    bool isLoad = false;
-    /*if (_rewardedAd != null) {
-      return;
-    }*/
+  Completer<bool>? _loading;
+
+  Future<bool> ensureLoaded() {
+    if (_rewardedAd != null) return Future.value(true);
+    final inFlight = _loading;
+    if (inFlight != null) return inFlight.future;
+    final completer = Completer<bool>();
+    _loading = completer;
     RewardedAd.load(
-        adUnitId: AdManager.rewardedAdUnitIdAndroid,
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          // Called when an ad is successfully received.
-          onAdLoaded: (ad) {
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-                // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {},
-                // Called when an impression occurs on the ad.
-                onAdImpression: (ad) {},
-                // Called when the ad failed to show full screen content.
-                onAdFailedToShowFullScreenContent: (ad, err) {
-                  // Dispose the ad here to free resources.
-                  ad.dispose();
-                },
-                // Called when the ad dismissed full screen content.
-                onAdDismissedFullScreenContent: (ad) {
-                  // Dispose the ad here to free resources.
-                  ad.dispose();
-                },
-                // Called when a click is recorded for an ad.
-                onAdClicked: (ad) {});
-
-            debugPrint('$ad loaded.');
-            // Keep a reference to the ad so you can show it later.
-            _rewardedAd = ad;
-            isLoad = true;
-          },
-          // Called when an ad request failed.
-          onAdFailedToLoad: (LoadAdError error) {
-
-            debugPrint('RewardedAd failed to load: $error');
-          },
-        ));
-    return isLoad;
+      adUnitId: AdManager.rewardedAdUnitIdAndroid,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+            },
+            onAdFailedToShowFullScreenContent: (ad, err) {
+              ad.dispose();
+            },
+          );
+          _rewardedAd = ad;
+          completer.complete(true);
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('RewardedAd failed to load: $error');
+          completer.complete(false);
+        },
+      ),
+    );
+    return completer.future.whenComplete(() => _loading = null);
   }
 
-  void showAd(Function reward , BuildContext context) {
-    var isLoad =  _loadAd();
-    _rewardedAd?.show(
-        onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
-      reward();
-    });
-    if(!isLoad){
+  Future<bool> showAd(Function reward, BuildContext context) async {
+    final ready = _rewardedAd != null || await ensureLoaded();
+    final ad = _rewardedAd;
+    if (!ready || ad == null) {
       Toast.show('No Ad Available',
           duration: 2,
-          webTexColor: context.read<AppColorController>().getColors().fontColor,
+          webTexColor:
+              context.read<AppColorController>().getColors().fontColor,
           backgroundColor:
-          context.read<AppColorController>().getColors().darkShadow);
+              context.read<AppColorController>().getColors().darkShadow);
+      return false;
     }
+    _rewardedAd = null;
+    ad.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
+      reward();
+    });
+    return true;
   }
 }

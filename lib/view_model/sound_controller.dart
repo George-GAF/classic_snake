@@ -18,8 +18,11 @@ class GameSound extends ChangeNotifier {
 
   static double _volume = .5;
 
-  static final AudioPlayer _player = AudioPlayer();
-  static final AudioPlayer _backGroundSound = AudioPlayer();
+  static AudioPlayer? _playerCache;
+  static AudioPlayer get _player => _playerCache ??= AudioPlayer();
+  static AudioPlayer? _backGroundSoundCache;
+  static AudioPlayer get _backGroundSound =>
+      _backGroundSoundCache ??= AudioPlayer();
 
   static void playSoundEffect(String soundName) async {
     if (soundON) {

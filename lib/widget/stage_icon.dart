@@ -17,13 +17,7 @@ class StageIcon extends StatelessWidget {
   //late final bool enable;
 
   void goToPlayScreen(BuildContext context) async {
-
-    await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => PlayScreen(),
-      ),
-    );
+    await Navigator.pushReplacementNamed(context, PlayScreen.routeName);
   }
 
   StageIcon({this.text, this.stageId});

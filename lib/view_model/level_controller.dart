@@ -19,10 +19,10 @@ class LevelController {
     return 'rank $rank}';
   }
 
-  bool scoreLevelDone(int target, int current) {
+  Future<bool> scoreLevelDone(int target, int current) async {
     bool scoreDone = current >= target;
     if (scoreDone) {
-      setLevelState();
+      await setLevelState();
     }
     return scoreDone;
   }
@@ -30,12 +30,12 @@ class LevelController {
   Future<bool> highScoreBroken(int current) async {
     int h = await getLevelHighScore();
     if (current >= h && current != 0) {
-      setLevelHighScore(current);
+      await setLevelHighScore(current);
     }
     return current > h;
   }
 
-  void setLevelState() async {
+  Future<void> setLevelState() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     await pref.setBool('$_levelState$rank', true);
   }
@@ -45,7 +45,7 @@ class LevelController {
     return pref.getBool('$_levelState$rank') ?? false;
   }
 
-  void setLevelHighScore(int highScore) async {
+  Future<void> setLevelHighScore(int highScore) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     await pref.setInt('$_levelHighScore$rank', highScore);
   }

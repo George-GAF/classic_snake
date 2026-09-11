@@ -53,6 +53,10 @@ class GameSize {
     return _width - _sideMargin;
   }
 
+  double sideMargin() {
+    return _sideMargin;
+  }
+
   int netHeight() {
     return _boxCount - _cellInRow;
   }

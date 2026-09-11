@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
 import '../gaf_package/ad_widget/rewarded_Ad.dart';
+import '../constant/constant.dart';
 import '../providers/stagePlay.dart';
 import '../screen/stages_screen.dart';
 import '../view_model/app_color.dart';
@@ -13,8 +16,8 @@ import '../view_model/sound_controller.dart';
 import '../view_model/timer_controller.dart';
 import 'ask_to_move_next_level.dart';
 import 'gaf_button.dart';
-import 'gaf_item.dart';
 import 'gaf_text.dart';
+import 'play_screen_widget/top_section.dart' show AnimatedNumber;
 
 double _height = GameSize().height();
 double _width = GameSize().width();
@@ -31,158 +34,165 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   @override
-  void initState() {
-    super.initState();
-    //InterstitialAdController.loadInterstitialAd();//TODO: change or remove NativeAds
-  }
-
-  @override
   Widget build(BuildContext context) {
-    double space = widget.visible! ? (_width - 140) / 4 : 0;
     var stagePlayWatch = context.watch<StagePlay>();
     var stageRead = context.read<StagePlay>();
+    var colors = context.watch<AppColorController>().getColors();
     return Stack(
+      fit: StackFit.expand,
       children: [
-        Container(
-          color: Colors.black.withOpacity(0.3),
-          width: widget.visible! ? MediaQuery.of(context).size.width : 0,
-          height: widget.visible! ? MediaQuery.of(context).size.height : 0,
-        ),
+        if (widget.visible!)
+          BackdropFilter(
+            // ponytail: full-screen blur while paused; KMenuBlurSigma -> 0 on low-end if jank
+            filter: ImageFilter.blur(
+                sigmaX: KMenuBlurSigma, sigmaY: KMenuBlurSigma),
+            child: Container(color: Colors.black.withOpacity(.45)),
+          ),
         AnimatedPositioned(
-          top: widget.visible! ? _height * .1 : _height,
+          top: widget.visible! ? _height * .07 : _height,
           duration: Duration(milliseconds: Manager.gameSpeed),
           child: Container(
-              padding: EdgeInsets.symmetric(
-                  vertical: _height * .03, horizontal: _width * .05),
-              decoration: BoxDecoration(
-                color:
-                    context.watch<AppColorController>().getColors().basicColor,
-                borderRadius: BorderRadius.circular(_width * .05),
-              ),
-              width: _width * .95,
-              height: _height * .8,
-              margin: EdgeInsets.symmetric(horizontal: _width * .025),
-              child: stagePlayWatch.showAskMenu
-                  ? AskToMoveNextLevel()
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GAFItem(
-                          child: GAFText(
-                            widget.isPause! ? 'Game Pause' : 'Game Over',
-                            fontSize: _width * .09,
-                            fontWeight: FontWeight.bold,
-                          ),
+            padding:
+                EdgeInsets.symmetric(vertical: _height * .02, horizontal: _width * .05),
+            decoration: BoxDecoration(
+              color: colors.menuColor.withOpacity(.96),
+              borderRadius: BorderRadius.circular(_width * .06),
+              border: Border.all(
+                  color: colors.glowColor.withOpacity(.45), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.glowColor.withOpacity(.35),
+                  blurRadius: _width * .05,
+                  spreadRadius: _width * .005,
+                ),
+              ],
+            ),
+            width: _width * .95,
+            height: _height * .78,
+            margin: EdgeInsets.symmetric(horizontal: _width * .025),
+            child: stagePlayWatch.showAskMenu
+                ? AskToMoveNextLevel()
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GAFText(
+                        widget.isPause! ? 'PAUSE' : 'GAME OVER',
+                        fontSize: _width * .1,
+                        fontWeight: FontWeight.w900,
+                        glowColor: colors.glowColor,
+                        textAlign: TextAlign.center,
+                        letterSpacing: 4,
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: _width * .04, vertical: _height * .01),
+                        decoration: BoxDecoration(
+                          color: colors.basicColor.withOpacity(.6),
+                          borderRadius: BorderRadius.circular(_width * .02),
+                          border: Border.all(
+                              color: colors.glowColor.withOpacity(.3)),
                         ),
-                        GAFItem(
-                          child: GAFText(
-                            'Your Score : ${stagePlayWatch.stageCurrentScore().toString()}\nPlay Time : ${GameTimer.showTimer()}',
-                            fontSize: _width * .045,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Manager.requestLife
-                            ? GAFItem(
-                                paddingH: 0,
-                                paddingV: 0,
-                                child: GAFButton(
-                                  text: 'Continue',
-                                  icon: Icons.play_arrow_rounded,
-                                  onPressed: () {
-                                    RewardedHelperAd().showAd(() {
-                                      runReward(context);
-
-                                    }, context);
-                                  },
-                                  startSpace: space,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GAFText(
+                                  'SCORE',
+                                  fontSize: _width * .03,
+                                  colorOpacity: .6,
                                 ),
-                              )
-                            : SizedBox(),
-                        GAFItem(
-                          paddingH: 0,
-                          paddingV: 0,
-                          child: GAFButton(
-                            text: widget.isPause! && !Manager.requestLife
-                                ? 'Resume'
-                                : 'Restart',
-                            icon: Icons.reset_tv,
-                            onPressed: () {
-                              if (widget.isPause! && !Manager.requestLife) {
-                                Manager.isPause = false;
-                                GameTimer.manageTimer();
-                                stageRead.gamePlay();
-                              } else {
-                                Manager.gameOver = true;
-                                stageRead.endGame();
-                                Manager.restartPressed = true;
-                                stagePlayWatch.start(Manager.currentStageID);
-                              }
-                              stageRead.setMenuState();
-                            },
-                            startSpace: space,
-                          ),
+                                AnimatedNumber(
+                                  target:
+                                      '${stagePlayWatch.stageCurrentScore()}',
+                                  bold: true,
+                                  accent: colors.glowColor,
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                GAFText(
+                                  'TIME',
+                                  fontSize: _width * .03,
+                                  colorOpacity: .6,
+                                ),
+                                GAFText(
+                                  GameTimer.showTimer(),
+                                  fontSize: _width * .04,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        GAFItem(
-                          paddingH: 0,
-                          paddingV: 0,
-                          child: GAFButton(
-                            text: 'Option',
-                            icon: Icons.settings_applications_rounded,
-                            onPressed: () {
-                              Manager.showOptionMenu(context);
-                            },
-                            startSpace: space,
-                          ),
+                      ),
+                      if (Manager.requestLife)
+                        GAFButton(
+                          text: 'Continue',
+                          icon: Icons.play_arrow_rounded,
+                          heightRate: 1.2,
+                          onPressed: () async {
+                            await RewardedHelperAd().showAd(() {
+                              runReward(context);
+                            }, context);
+                          },
                         ),
-                        GAFItem(
-                          paddingH: 0,
-                          paddingV: 0,
-                          child: GAFButton(
-                            text: 'Back To Main',
-                            icon: Icons.keyboard_return_rounded,
-                            onPressed: () async {
-                              // await InterstitialAdController.showInterstitialAd();//TODO: change or remove NativeAds
-                              stageRead.showMenu = false;
-                              //RewardedAdController.setNull();
-                              stageRead.endGame();
-                              await Navigator.pushReplacementNamed(
-                                  context, StageScreen.routeName);
-                            },
-                            startSpace: space,
-                          ),
-                        ),
-                        GAFItem(
-                          paddingH: 0,
-                          paddingV: 0,
-                          //paddingV: 5,
-                          child: GAFButton(
-                            text: 'Exit',
-                            icon: Icons.exit_to_app_rounded,
-                            onPressed: () {
-                              GameSound.stopAllSoundOnExit();
-                              SystemNavigator.pop(animated: true);
-                            },
-                            startSpace: space,
-                          ),
-                        )
-                      ],
-                    )),
+                      GAFButton(
+                        text: widget.isPause! && !Manager.requestLife
+                            ? 'Resume'
+                            : 'Restart',
+                        icon: Icons.reset_tv,
+                        onPressed: () {
+                          if (widget.isPause! && !Manager.requestLife) {
+                            Manager.isPause = false;
+                            GameTimer.manageTimer();
+                            stageRead.gamePlay();
+                          } else {
+                            Manager.gameOver = true;
+                            stageRead.endGame();
+                            Manager.restartPressed = true;
+                            stagePlayWatch.start(Manager.currentStageID);
+                          }
+                          stageRead.setMenuState();
+                        },
+                      ),
+                      GAFButton(
+                        text: 'Option',
+                        icon: Icons.settings_applications_rounded,
+                        onPressed: () {
+                          Manager.showOptionMenu(context);
+                        },
+                      ),
+                      GAFButton(
+                        text: 'Back To Main',
+                        icon: Icons.keyboard_return_rounded,
+                        onPressed: () async {
+                          stageRead.showMenu = false;
+                          stageRead.endGame();
+                          await Navigator.pushReplacementNamed(
+                              context, StageScreen.routeName);
+                        },
+                      ),
+                      GAFButton(
+                        text: 'Exit',
+                        icon: Icons.exit_to_app_rounded,
+                        onPressed: () {
+                          GameSound.stopAllSoundOnExit();
+                          SystemNavigator.pop(animated: true);
+                        },
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ],
     );
   }
 }
 
-/*// TODO : need to show when ads not run*/
-void _showToastMassage(BuildContext context) {
-  Toast.show('No Ad Available',
-      duration: 2,
-      webTexColor: context.read<AppColorController>().getColors().fontColor,
-      backgroundColor:
-          context.read<AppColorController>().getColors().darkShadow);
-}
-
-//*/
 void runReward(BuildContext context) {
   var stagePlay = context.read<StagePlay>();
   try {
@@ -193,23 +203,10 @@ void runReward(BuildContext context) {
     stagePlay.gamePlay();
     stagePlay.setMenuState();
   } catch (e) {
-    _showToastMassage(context);
+    Toast.show('No Ad Available',
+        duration: 2,
+        webTexColor: context.read<AppColorController>().getColors().fontColor,
+        backgroundColor:
+            context.read<AppColorController>().getColors().darkShadow);
   }
-
-  /*
-  final _ = RewardedAdController(() {
-    try {
-      Manager.isExtraLifeTaken = true;
-      Manager.requestLife = false;
-      Manager.isPause = false;
-      Provider.of<Snake>(context, listen: false)
-          .giveExtraLife();
-      Provider.of<Snake>(context, listen: false)
-          .moveSnake();
-      Provider.of<Snake>(context, listen: false)
-          .setMenuState();
-    } catch (e) {}
-  }, () {
-    _showToastMassage(context);
-  });*/
 }

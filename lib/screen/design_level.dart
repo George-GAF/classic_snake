@@ -87,8 +87,9 @@ class _DesignLevelState extends State<DesignLevel> {
     double width = GameSize().width();
     double height = GameSize().height();
     double avaWidth = GameSize().avaWidth();
+    final colors = Provider.of<AppColorController>(context).getColors();
     return Scaffold(
-      backgroundColor: Color.fromRGBO(71, 148, 254, .7),
+      backgroundColor: colors.basicColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -181,13 +182,8 @@ class _DesignLevelState extends State<DesignLevel> {
                                               },
                                               child: Icon(
                                                 Icons.close,
-                                                color: Provider.of<
-                                                            AppColorController>(
-                                                        context)
-                                                    .getColors()
-                                                    .fontColor,
-                                                size:
-                                                    GameSize().avaWidth() * .09,
+                                                color: colors.fontColor,
+                                                size: GameSize().avaWidth() * .09,
                                               ),
                                             ),
                                           ],
@@ -202,10 +198,12 @@ class _DesignLevelState extends State<DesignLevel> {
                                       softWrap: true,
                                       fontSize: GameSize().avaWidth() * .05,
                                     ),
-                                    backgroundColor:
-                                        Provider.of<AppColorController>(context)
-                                            .getColors()
-                                            .menuColor,
+                                    backgroundColor: colors.menuColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      side: BorderSide(
+                                          color: colors.glowColor, width: 1),
+                                    ),
                                   );
                                 });
                           },
@@ -213,33 +211,26 @@ class _DesignLevelState extends State<DesignLevel> {
                             padding:
                                 EdgeInsets.all(GameSize().avaWidth() * .015),
                             decoration: BoxDecoration(
-                              color: Provider.of<AppColorController>(context)
-                                  .getColors()
-                                  .basicColor,
+                              color: colors.basicColor,
                               borderRadius: BorderRadius.circular(50),
                               boxShadow: [
                                 BoxShadow(
-                                    color:
-                                        Provider.of<AppColorController>(context)
-                                            .getColors()
-                                            .lightShadow,
+                                    color: colors.lightShadow,
                                     offset: Offset(-1, -1),
                                     blurRadius: 3),
                                 BoxShadow(
-                                    color:
-                                        Provider.of<AppColorController>(context)
-                                            .getColors()
-                                            .darkShadow,
+                                    color: colors.darkShadow,
                                     offset: Offset(1, 1),
-                                    blurRadius: 3)
+                                    blurRadius: 3),
+                                BoxShadow(
+                                    color: colors.glowColor.withOpacity(.4),
+                                    blurRadius: 8),
                               ],
                             ),
                             child: Icon(
                               Icons.info_outline_rounded,
                               size: avaWidth * .08,
-                              color: Provider.of<AppColorController>(context)
-                                  .getColors()
-                                  .fontColor,
+                              color: colors.fontColor,
                             ),
                           ),
                         ),
@@ -308,7 +299,7 @@ class _DesignLevelState extends State<DesignLevel> {
                 decoration: BoxDecoration(
                   border: Border.all(
                     width: 2,
-                    color: Color.fromRGBO(67, 67, 67, 1),
+                    color: colors.glowColor.withOpacity(.45),
                   ),
                 ),
                 child: GridView.builder(
@@ -344,7 +335,7 @@ class _DesignLevelState extends State<DesignLevel> {
                       },
                       child: KSnakeStarting.contains(i)
                           ? Container(
-                              color: Colors.white70,
+                              color: colors.snakeColor,
                             )
                           : Cell(
                               cellTypeList[i],

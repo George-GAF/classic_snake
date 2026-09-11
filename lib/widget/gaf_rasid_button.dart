@@ -1,6 +1,7 @@
 import 'package:classic_snake/view_model/app_color.dart';
 import 'package:classic_snake/view_model/game_size.dart';
 import 'package:classic_snake/widget/gaf_text.dart';
+import 'package:classic_snake/widget/neon_pressable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,38 +17,38 @@ class GAFRaisedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = GameSize().width();
-    return GestureDetector(
-      onTap: (){
+    return NeonPressable(
+      onTap: () {
         GameSound.playSoundEffect(KButtonClick);
         onPressed!();
-        },
-      child: Container(
-        padding: EdgeInsets.all(width * .015),
-        child: GAFText(
-          label,
-          fontWeight: FontWeight.bold,
-          fontSize: width * .04,
-          softWrap: true,
-        ),
-        decoration: BoxDecoration(
-            color:
-                Provider.of<AppColorController>(context).getColors().darkShadow,
+      },
+      builder: (context, down) {
+        var colors =
+            Provider.of<AppColorController>(context).getColors();
+        return Container(
+          padding: EdgeInsets.all(width * .015),
+          decoration: BoxDecoration(
+            color: colors.glowColor.withOpacity(.25),
             borderRadius: BorderRadius.circular(width * .15),
+            border: Border.all(
+              color: colors.glowColor.withOpacity(down ? .95 : .4),
+              width: down ? 2 : 1,
+            ),
             boxShadow: [
               BoxShadow(
-                  offset: Offset(width * .008, width * .008),
-                  blurRadius: width * .02,
-                  color: Provider.of<AppColorController>(context)
-                      .getColors()
-                      .basicColor),
-              BoxShadow(
-                  offset: Offset(-width * .008, -width * .008),
-                  blurRadius: width * .02,
-                  color: Provider.of<AppColorController>(context)
-                      .getColors()
-                      .lightShadow),
-            ]),
-      ),
+                color: colors.glowColor.withOpacity(down ? .85 : .2),
+                blurRadius: width * (down ? .04 : .02),
+              ),
+            ],
+          ),
+          child: GAFText(
+            label,
+            fontWeight: FontWeight.bold,
+            fontSize: width * .04,
+            softWrap: true,
+          ),
+        );
+      },
     );
   }
 }
