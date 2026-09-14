@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../constant/constant.dart';
 import '../constant/enum_file.dart';
@@ -24,6 +24,10 @@ class StagePlay extends ChangeNotifier {
   bool showMenu = false;
   bool showTapMassage = true;
   int _hScore = 0;
+  int _lastPersistedHighScore = 0;
+
+  final Uint8List _grid = Uint8List(GameSize.boxCount());
+  int frame = 0;
 
   int fxPulse = 0;
   int eatenAt = -1;
@@ -36,6 +40,11 @@ class StagePlay extends ChangeNotifier {
 
   Timer? gameTimer;
   Timer? _sfTimer;
+  int _session = 0;
+
+  Uint8List get grid => _grid;
+
+  int get highScore => _hScore;
 
   void gamePlay() {
     if (gameTimer?.isActive ?? false) return;
@@ -48,14 +57,32 @@ class StagePlay extends ChangeNotifier {
         gamePlay();
         return;
       }
-      if (!Manager.gameOver && !Manager.isPause) {
-        snake!.moving();
-        _isaLife();
-        _eating();
-        checkAvailabilityForSpecialFood();
-      }
+      if (Manager.gameOver || Manager.isPause) return;
+      snake!.moving();
+      _isaLife();
+      _eating();
+      checkAvailabilityForSpecialFood();
+      _reindex();
       notifyListeners();
     });
+  }
+
+  void _reindex() {
+    final body = snake!.getBody();
+    _grid.fillRange(0, _grid.length, 0);
+    for (final b in level!.blocks!) {
+      _grid[b] = 1;
+    }
+    for (final s in body) {
+      _grid[s] = 2;
+    }
+    _grid[Manager.food] = 3;
+    for (final g in Manager.giftFoods) {
+      _grid[g] = 4;
+    }
+    final sf = stage!.sFood;
+    if (sf >= 0 && sf < _grid.length) _grid[sf] = 5;
+    frame++;
   }
 
   bool isTargetBroken() {
@@ -72,17 +99,12 @@ class StagePlay extends ChangeNotifier {
     if (refresh) notifyListeners();
   }
 
-  void readHScore(int hScore) {
-    _hScore = hScore;
-  }
-
   Direct getDirect() {
     return snake!.getDirect();
   }
 
   void changeDirect(Direct direct) {
     snake!.setDirect(direct);
-    notifyListeners();
   }
 
   void _isaLife() {
@@ -145,7 +167,11 @@ class StagePlay extends ChangeNotifier {
       }
     }
     if (_score >= _hScore) {
-      controller!.setLevelHighScore(_score);
+      _hScore = _score;
+      if (_score > _lastPersistedHighScore) {
+        _lastPersistedHighScore = _score;
+        controller!.setLevelHighScore(_score);
+      }
       if (!_hScoreBroken) {
         _hScoreBroken = true;
         GameSound.playSoundEffect(KHeightScoreBreakFileSound);
@@ -179,26 +205,34 @@ class StagePlay extends ChangeNotifier {
 
   void _showSpecialFood() {
     if (Manager.gameOver) return;
-    if (!Manager.restartPressed) {
-      if (!Manager.isPause) {
-        while (snake!.getBody().contains(stage!.sFood) ||
+    if (Manager.restartPressed) {
+      Manager.restartPressed = false;
+      return;
+    }
+    if (Manager.isPause) {
+      Manager.timerSFRun = false;
+      return;
+    }
+    final session = _session;
+    int guard = 0;
+    do {
+      stage!.sFood = Random().nextInt(GameSize.boxCount() - 1);
+      guard++;
+    } while (guard < 64 &&
+        (snake!.getBody().contains(stage!.sFood) ||
             level!.blocks!.contains(stage!.sFood) ||
             stage!.sFood == stage!.food ||
-            stage!.sFood == GameSize.boxCount() + 1 ||
-            Manager.giftFoods.contains(stage!.sFood)) {
-          stage!.sFood = Random().nextInt(GameSize.boxCount() - 1);
-          Future.delayed(Duration(seconds: 15), () {
-            if (Manager.gameOver) return;
-            if (!Manager.isSFoodEating) {
-              stage!.sFood = GameSize.boxCount() + 1;
-              Manager.timerSFRun = false;
-            }
-          });
-        }
-      }
-    } else {
-      Manager.restartPressed = false;
+            Manager.giftFoods.contains(stage!.sFood)));
+    if (guard >= 64) {
+      Manager.timerSFRun = false;
+      return;
     }
+    Future<void>.delayed(const Duration(seconds: 15), () {
+      if (session != _session) return;
+      if (Manager.gameOver || Manager.isSFoodEating) return;
+      stage!.sFood = GameSize.boxCount() + 1;
+      Manager.timerSFRun = false;
+    });
   }
 
   void giveExtraLife() {
@@ -212,20 +246,30 @@ class StagePlay extends ChangeNotifier {
     gameTimer = null;
     _sfTimer?.cancel();
     _sfTimer = null;
+    _session++;
     Manager.startGame();
     Manager.currentStageID = levelID;
     level = levelList[levelID];
-    print('id = $levelID level detail ${level.toString()}');
+    if (kDebugMode) {
+      print('id = $levelID level detail ${level.toString()}');
+    }
     controller = new LevelController(level!.rank!);
     snake = new Snake();
     stage = new Stage(level!);
     _hScore = 0;
+    _lastPersistedHighScore = 0;
     _targetBroken = false;
     _hScoreBroken = false;
     showTapMassage = true;
     showMenu = false;
     _isAskedToMoveToNextLevel = false;
     showAskMenu = false;
+    _reindex();
+    controller!.getLevelHighScore().then((value) {
+      _hScore = value;
+      _lastPersistedHighScore = value;
+      notifyListeners();
+    });
     notifyListeners();
   }
 
@@ -234,6 +278,7 @@ class StagePlay extends ChangeNotifier {
     gameTimer = null;
     _sfTimer?.cancel();
     _sfTimer = null;
+    _session++;
     Manager.endGame();
     notifyListeners();
   }

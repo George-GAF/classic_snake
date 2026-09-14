@@ -53,6 +53,14 @@ class GameSound extends ChangeNotifier {
     clean(_backGroundSound);
   }
 
+  static void pauseBackgroundMusic() {
+    if (_backGroundSoundCache != null) _backGroundSound.pause();
+  }
+
+  static void resumeBackgroundMusic() {
+    if (musicON && _backGroundSoundCache != null) _backGroundSound.resume();
+  }
+
   void getSoundSetting() {
     _getSound(refresh: false);
     _getMusic(refresh: false);
@@ -109,23 +117,4 @@ class GameSound extends ChangeNotifier {
     _getMusic();
     return musicON;
   }
-// to pause music if app in background
-  bool isAppInForeground = true;
-
-  Future<void> playAudio(String url) async {
-    if (isAppInForeground) {
-      await _backGroundSound.play(UrlSource(url));
-    }
-  }
-
-  Future<void> pauseAudio() async {
-    await _backGroundSound.pause();
-  }
-
-  void setIsAppInForeground(bool value) {
-    isAppInForeground = value;
-    notifyListeners();
-  }
-
-
 }

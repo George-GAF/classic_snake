@@ -14,6 +14,7 @@ import 'view_model/app_color.dart';
 import 'view_model/game_size.dart';
 import 'view_model/manager.dart';
 import 'view_model/sound_controller.dart';
+import 'view_model/timer_controller.dart';
 //android.bundle.enableUncompressedNativeLibs=false
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // Needed for SystemChrome.setPreferredOrientations()
@@ -30,7 +31,45 @@ runApp(
     );
 }
 
-class MyApp extends StatelessWidget  {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        GameSound.pauseBackgroundMusic();
+        if (Manager.gameRun && !Manager.gameOver) {
+          Manager.isPause = true;
+          GameTimer.manageTimer();
+          Manager.sendToBackground = true;
+          if (mounted) context.read<StagePlay>().setMenuState();
+        }
+        break;
+      case AppLifecycleState.resumed:
+        GameSound.resumeBackgroundMusic();
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
 
   Future<InitializationStatus> _initGoogleMobileAds() {
     return MobileAds.instance.initialize();

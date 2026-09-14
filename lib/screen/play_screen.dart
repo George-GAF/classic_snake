@@ -9,10 +9,10 @@ import '../providers/stagePlay.dart';
 import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 import '../view_model/manager.dart';
-import '../widget/cell/cell.dart';
 import '../widget/game_menu.dart';
 import '../widget/play_screen_widget/game_effects.dart';
 import '../widget/play_screen_widget/neon_grid.dart';
+import '../widget/play_screen_widget/play_board.dart';
 import '../widget/play_screen_widget/screen_shake.dart';
 import '../widget/play_screen_widget/tap_to_play.dart';
 import '../widget/play_screen_widget/top_section.dart';
@@ -68,7 +68,7 @@ class PlayScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        clipBehavior: Clip.antiAlias,
+                        clipBehavior: Clip.hardEdge,
                         child: Stack(
                           children: [
                             Positioned.fill(
@@ -80,7 +80,9 @@ class PlayScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            PlayArea(stagePlay: stagePlay),
+                            Positioned.fill(
+                              child: PlayBoard(stagePlay: stagePlay),
+                            ),
                           ],
                         ),
                       ),
@@ -118,9 +120,16 @@ class SwipeSteer extends StatefulWidget {
   _SwipeSteerState createState() => _SwipeSteerState();
 }
 
+class _Ghost {
+  final Direct? dir;
+  final int seq;
+
+  const _Ghost(this.dir, this.seq);
+}
+
 class _SwipeSteerState extends State<SwipeSteer> {
   Offset? _start;
-  Direct? _lastSteer;
+  final ValueNotifier<_Ghost> _ghost = ValueNotifier(const _Ghost(null, 0));
   int _steerSeq = 0;
 
   void _steer(Offset current) {
@@ -134,11 +143,17 @@ class _SwipeSteerState extends State<SwipeSteer> {
     );
     if (dir != null) {
       _start = current;
-      _lastSteer = dir;
       _steerSeq++;
+      _ghost.value = _Ghost(dir, _steerSeq);
       HapticFeedback.selectionClick();
       widget.stagePlay.changeDirect(dir);
     }
+  }
+
+  @override
+  void dispose() {
+    _ghost.dispose();
+    super.dispose();
   }
 
   @override
@@ -157,7 +172,11 @@ class _SwipeSteerState extends State<SwipeSteer> {
                 maxWidth: avaWidth, maxHeight: GameSize().getStageHeight().toDouble()),
             child: widget.child,
           ),
-          _SwipeGhost(steer: _lastSteer, seq: _steerSeq),
+          ValueListenableBuilder<_Ghost>(
+            valueListenable: _ghost,
+            builder: (_, g, __) =>
+                _SwipeGhost(steer: g.dir, seq: g.seq),
+          ),
         ],
       ),
     );
@@ -213,50 +232,6 @@ class _SwipeGhost extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class PlayArea extends StatelessWidget {
-  const PlayArea({
-    super.key,
-    required this.stagePlay,
-  });
-
-  final StagePlay stagePlay;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      itemCount: GameSize.boxCount(),
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: GameSize().cellInRow(),
-      ),
-      itemBuilder: (cont, i) {
-        // stagePlay.setCellType(i);
-        var snake = stagePlay.snake!.getBody();
-        var blocks = stagePlay.level!.blocks;
-        var giftFood = Manager.giftFoods;
-        var food = Manager.food;
-        var sFood = stagePlay.stage!.sFood;
-        CellType cellType = CellType.Ground;
-
-        if (blocks!.contains(i)) {
-          cellType = CellType.Block;
-        } else if (snake.contains(i)) {
-          cellType = CellType.Snake;
-        } else if (food == i || giftFood.contains(i)) {
-          cellType = CellType.Food;
-        } else if (sFood == i) {
-          cellType = CellType.SpecialFood;
-        }
-
-        return Cell(
-          cellType,
-          i,
-        );
-      },
     );
   }
 }

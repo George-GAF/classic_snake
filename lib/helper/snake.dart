@@ -11,12 +11,12 @@ class Snake {
   late List<int> _body;
   late int _head;
   late Direct _currentDir;
+  final List<Direct> _queue = [];
 
-  Snake() {
+  Snake({Direct initial = Direct.Down}) {
     _head = _snakeStarting.last;
     _body = _snakeStarting;
-    _currentDir = Direct.Down;
-
+    _currentDir = initial;
   }
 
   String toString() {
@@ -32,10 +32,29 @@ class Snake {
   }
 
   void setDirect(Direct newDirect) {
-    _currentDir = newDirect;
+    final last = _queue.isNotEmpty ? _queue.last : _currentDir;
+    if (_isOpposite(last, newDirect)) return;
+    _queue.add(newDirect);
+    if (_queue.length > 2) {
+      _queue.removeAt(0);
+      while (_queue.isNotEmpty && _isOpposite(_currentDir, _queue.first)) {
+        _queue.removeAt(0);
+      }
+    }
+  }
+
+  static bool _isOpposite(Direct a, Direct b) {
+    return (a == Direct.Up && b == Direct.Down) ||
+        (a == Direct.Down && b == Direct.Up) ||
+        (a == Direct.Left && b == Direct.Right) ||
+        (a == Direct.Right && b == Direct.Left);
   }
 
   void moving() {
+    if (_queue.isNotEmpty) {
+      final next = _queue.removeAt(0);
+      if (!_isOpposite(_currentDir, next)) _currentDir = next;
+    }
     int newV;
     switch (_currentDir) {
       case Direct.Up:

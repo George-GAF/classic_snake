@@ -311,16 +311,10 @@ class ScoreLine extends StatelessWidget {
           value: score,
           bold: isBroken,
         ),
-        FutureBuilder(
-          builder: (_, hScore) {
-            context.read<StagePlay>().readHScore(hScore.data ?? 0);
-            return _HudBadge(
-              accent: colors.glowColor,
-              label: 'HIGH',
-              value: '${hScore.data ?? 0}',
-            );
-          },
-          future: context.read<StagePlay>().controller?.getLevelHighScore(),
+        _HudBadge(
+          accent: colors.glowColor,
+          label: 'HIGH',
+          value: '${data.highScore}',
         ),
       ],
     );

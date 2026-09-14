@@ -18,7 +18,7 @@ class GameEffects extends StatefulWidget {
 class _Burst {
   final Offset center;
   final Color color;
-  final String label;
+  final TextPainter label;
   final List<_Particle> particles;
   _Burst(this.center, this.color, this.label, this.particles);
 }
@@ -56,9 +56,22 @@ class _GameEffectsState extends State<GameEffects>
     final row = stage.eatenAt ~/ GameSize().cellInRow();
     final center = Offset(col * cell + cell / 2, row * cell + cell / 2);
     final color = stage.fxIsSpecial ? colors.glowColor : colors.foodColor;
-    final label = stage.fxIsSpecial
-        ? (stage.stage?.reward ?? '')
-        : '+10';
+    final text = stage.fxIsSpecial ? (stage.stage?.reward ?? '') : '+10';
+    final label = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: text.length > 8 ? cell * .6 : cell * .7,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Orbitron',
+          shadows: [
+            Shadow(color: color, blurRadius: cell * .6),
+          ],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
     final rng = Random();
     final particles = List.generate(18, (i) {
       return _Particle(
@@ -125,22 +138,8 @@ class _FxPainter extends CustomPainter {
         ..color = b.color.withOpacity(.9 * (1 - t)),
     );
 
-    if (t < 1 && b.label.isNotEmpty) {
-      final tp = TextPainter(
-        text: TextSpan(
-          text: b.label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(1 - t),
-            fontSize: b.label.length > 8 ? cell * .6 : cell * .7,
-            fontWeight: FontWeight.w900,
-            fontFamily: 'Orbitron',
-            shadows: [
-              Shadow(color: b.color, blurRadius: cell * .6),
-            ],
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
+    if (t < 1) {
+      final tp = b.label;
       tp.paint(
         canvas,
         b.center - Offset(tp.width / 2, tp.height / 2 + t * cell * 2),

@@ -8,7 +8,6 @@ import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 import '../view_model/manager.dart';
 import '../view_model/sound_controller.dart';
-import '../view_model/timer_controller.dart';
 import '../widget/gaf_text.dart';
 import '../widget/main_menu_button.dart';
 import 'stages_screen.dart';
@@ -20,23 +19,13 @@ class MenuScreen extends StatefulWidget {
   _MenuScreenState createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
+class _MenuScreenState extends State<MenuScreen> {
   bool showLoadCircle = false;
 
   @override
   void initState() {
     super.initState();
     GameSound().backgroundMusic();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused && Manager.gameRun) {
-      Manager.isPause = true;
-      GameTimer.manageTimer();
-      Manager.sendToBackground = true;
-    }
   }
 
   @override
