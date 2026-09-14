@@ -252,13 +252,6 @@ class _DesignLevelState extends State<DesignLevel> {
                                 bool saved = await controller.levelSave(
                                     targetScore, blocks);
                                 if (saved) {
-                                  levelList[levelList.length - 1] =
-                                      new LevelModel(
-                                    rank: 999,
-                                    enable: true,
-                                    targetScore: targetScore,
-                                    blocks: blocks,
-                                  );
                                   context
                                       .read<StagePlay>()
                                       .start(levelList.length - 1);

@@ -1,6 +1,7 @@
 import 'package:classic_snake/view_model/timer_controller.dart';
 import 'package:flutter/material.dart' show BuildContext, showDialog;
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constant/game_values.dart';
 import '../widget/option_menu.dart';
@@ -20,6 +21,9 @@ class Manager {
   static bool sendToBackground = false;
   static bool isMustChangeSnakeColor = false;
   static bool isSFoodEating = false;
+
+  static bool dPadEnabled = false;
+  static const String _dPadStateKey = 'dPadState';
 
   static int currentStageID = 0;
   static int gameScore = 0;
@@ -61,6 +65,17 @@ class Manager {
   static void changeGameSpeed(int newSpeed) {
     gameSpeed = newSpeed;
     isChangeGameSpeed = true;
+  }
+
+  static Future<void> loadDPadSetting() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    dPadEnabled = pref.getBool(_dPadStateKey) ?? false;
+  }
+
+  static Future<void> switchDPadSetting() async {
+    dPadEnabled = !dPadEnabled;
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.setBool(_dPadStateKey, dPadEnabled);
   }
 
   static void screenAdjust() {

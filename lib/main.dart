@@ -6,7 +6,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'providers/stagePlay.dart';
 import 'screen/design_level.dart';
 import 'screen/landing_screen.dart';
-import 'screen/loading_screen.dart';
 import 'screen/menu_screen.dart';
 import 'screen/play_screen.dart';
 import 'screen/stages_screen.dart';
@@ -16,9 +15,10 @@ import 'view_model/manager.dart';
 import 'view_model/sound_controller.dart';
 import 'view_model/timer_controller.dart';
 //android.bundle.enableUncompressedNativeLibs=false
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Needed for SystemChrome.setPreferredOrientations()
   Manager.screenAdjust();
+  await Manager.loadDPadSetting();
 runApp(
       MultiProvider(
         providers: [
@@ -99,7 +99,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: {
         MenuScreen.routeName: (context) => MenuScreen(),
         PlayScreen.routeName: (context) => PlayScreen(),
-        LoadingScreen.routeName: (context) => LoadingScreen(),
         StageScreen.routeName: (context) => StageScreen(),
         LandingScreen.routeName: (context) => LandingScreen(),
         DesignLevel.routeName: (context) => DesignLevel(),
@@ -108,7 +107,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final builders = <String, WidgetBuilder>{
           MenuScreen.routeName: (context) => MenuScreen(),
           PlayScreen.routeName: (context) => PlayScreen(),
-          LoadingScreen.routeName: (context) => LoadingScreen(),
           StageScreen.routeName: (context) => StageScreen(),
           LandingScreen.routeName: (context) => LandingScreen(),
           DesignLevel.routeName: (context) => DesignLevel(),

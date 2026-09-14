@@ -20,7 +20,7 @@ class AskToMoveNextLevel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GAFText(
-          "🎉 Congratulations 🎉",
+          "CONGRATULATIONS",
           fontSize: 20,
           fontWeight: FontWeight.bold,
           textAlign: TextAlign.center,
@@ -29,7 +29,7 @@ class AskToMoveNextLevel extends StatelessWidget {
           height: space,
         ),
         GAFText(
-          "🐍 Snake Master! 🐍",
+          "SNAKE MASTER!",
           fontSize: 20,
           fontWeight: FontWeight.bold,
           textAlign: TextAlign.center,
@@ -38,7 +38,7 @@ class AskToMoveNextLevel extends StatelessWidget {
           height: space,
         ),
         GAFText(
-          "You've slithered through the level like a pro. Ready to take it up a notch?.",
+          "You've slithered through the level like a pro.\nReady to take it up a notch?",
           fontSize: 16,
           fontWeight: FontWeight.bold,
           textAlign: TextAlign.center,
@@ -60,7 +60,7 @@ class AskToMoveNextLevel extends StatelessWidget {
               context.read<StagePlay>().start(tempId);
               context.read<StagePlay>().showMenu = false;
             },
-            text: "YES🔥! Bring on the next challenge,I’m unstoppable! 🐍🔥",
+            text: "YES! BRING ON THE NEXT CHALLENGE — I'M UNSTOPPABLE",
           ),
         ),
         SizedBox(
@@ -79,7 +79,7 @@ class AskToMoveNextLevel extends StatelessWidget {
               context.read<StagePlay>().showMenu = false;
               context.read<StagePlay>().showAskMenu = false;
             },
-            text: "NOPE, let me dominate this level a bit longer! 😎",
+            text: "NOT YET — I'LL DOMINATE THIS LEVEL A BIT LONGER",
           ),
         )
       ],

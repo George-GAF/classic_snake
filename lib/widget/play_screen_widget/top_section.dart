@@ -108,48 +108,67 @@ class _HudBadge extends StatelessWidget {
   final String label;
   final String value;
   final bool bold;
+  final bool flash;
 
   const _HudBadge({
     required this.accent,
     required this.label,
     required this.value,
     this.bold = true,
+    this.flash = false,
   });
 
   @override
   Widget build(BuildContext context) {
     var colors = context.watch<AppColorController>().getColors();
+    Widget chip = Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: width * .02, vertical: height * .002),
+      decoration: BoxDecoration(
+        color: colors.menuColor.withOpacity(.5),
+        borderRadius: BorderRadius.circular(width * .02),
+        border: Border.all(color: accent.withOpacity(.55)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withOpacity(.25),
+            blurRadius: width * .02,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GAFText(
+            label,
+            fontSize: fontSize * .75,
+            colorOpacity: .7,
+          ),
+          AnimatedNumber(
+            target: value,
+            bold: bold,
+            accent: accent,
+          ),
+        ],
+      ),
+    );
+    if (!flash) {
+      return Flexible(fit: FlexFit.loose, child: chip);
+    }
     return Flexible(
       fit: FlexFit.loose,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-            horizontal: width * .02, vertical: height * .002),
-        decoration: BoxDecoration(
-          color: colors.menuColor.withOpacity(.5),
-          borderRadius: BorderRadius.circular(width * .02),
-          border: Border.all(color: accent.withOpacity(.55)),
-          boxShadow: [
-            BoxShadow(
-              color: accent.withOpacity(.25),
-              blurRadius: width * .02,
-            ),
-          ],
+      child: TweenAnimationBuilder<double>(
+        key: const ValueKey('hscore-flash'),
+        tween: Tween(begin: 1, end: 0),
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOutCubic,
+        builder: (_, v, child) => Transform.scale(
+          scale: 1 + .06 * v,
+          child: Opacity(
+            opacity: .7 + .3 * (1 - v),
+            child: child,
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GAFText(
-              label,
-              fontSize: fontSize * .75,
-              colorOpacity: .7,
-            ),
-            AnimatedNumber(
-              target: value,
-              bold: bold,
-              accent: accent,
-            ),
-          ],
-        ),
+        child: chip,
       ),
     );
   }
@@ -295,6 +314,7 @@ class ScoreLine extends StatelessWidget {
     var colors = context.watch<AppColorController>().getColors();
     var score = '${data.stageCurrentScore()}';
     var isBroken = data.isTargetBroken();
+    var isHSBroken = data.isHScoreBroken();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -312,9 +332,11 @@ class ScoreLine extends StatelessWidget {
           bold: isBroken,
         ),
         _HudBadge(
-          accent: colors.glowColor,
+          accent: isHSBroken ? colors.foodColor : colors.glowColor,
           label: 'HIGH',
           value: '${data.highScore}',
+          bold: true,
+          flash: isHSBroken,
         ),
       ],
     );

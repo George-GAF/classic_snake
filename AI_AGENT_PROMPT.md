@@ -53,7 +53,7 @@
 ### Commands
 - Analyze: `flutter analyze` (or `dart analyze`)
 - Stage grid is unitless / index-only, so most logic can run headless for tests.
-- Tests: `flutter test` — currently **no real tests** (see Known Issues).
+- Tests: `flutter test` — **52 tests** covering `Snake` (movement/wrap/input queue/die), `resolveSwipe`, `LevelController` (prefs/unlock), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate`, `StagePlay` (start/score/unlock/decoupling), `GameSound` (pause/resume), the D-pad widget, and game-loop tick timing (`loop_test.dart` via fakeAsync).
 - Build release: `flutter build apk --release` / `flutter build appbundle` (Android signing via `android/key.properties`, must exist locally; release build type uses `signingConfigs.release`).
 
 ### Assets
@@ -97,7 +97,6 @@ StageScreen /stagesScreen [level grid, "Create your own level", update+rating di
    ├─ StageIcon tap → StagePlay.start(id) → pushReplacement → PlayScreen
    └─ DesignLevel /designLevel (level editor) → save → start(31 customize) → PlayScreen
 PlayScreen /PlayScreen (swipe game)
-LoadingScreen "LoadingScreen" (registered, appears unused in flow)
 ```
 Navigation between stages uses `pushReplacementNamed` everywhere (no back stack for game screens).
 
@@ -114,7 +113,6 @@ lib/
 │   ├── game_values.dart       KSnakeStarting=[30,50,70,90], KDefaultGameSpeed=300, KEatScoreValue=10
 │   └── level_indexs.dart      30 const Lists of block cell indices (IndexLevelOne…IndexLevelThirty)
 ├── model/
-│   ├── position.dart          Cell index → (row, col) helper (uses GameSize().cellInRow())
 │   ├── level_model.dart       LevelModel class + global `levelList` (32 entries) + all 30 level defs
 │   └── color_app.dart         AppColor class + 5 themes (blue/red/green/light/dark) + appColorList
 ├── view_model/                (logic layer — mostly static/singletons)
@@ -156,18 +154,18 @@ lib/
 | `landing_screen.dart` | `/LandingScreen` | Typewriter-ish animated "GAF - Programing" splash; after animation → `MenuScreen`. Calls `LevelController(0).setLevelState()` in initState (unlocks Survival). |
 | `menu_screen.dart` | `/MenuScreen` | START / Option / Exit big buttons + "Made By GAF-Programing 2023". Starts background music; lifecycle observer pauses game when app backgrounded. Wraps START in a spinner (`LoadingContainer`), then pushes `StageScreen`. |
 | `stages_screen.dart` | `/stagesScreen` | Back button, "Levels" title, "Create your own level" button, 3-column grid of `StageIcon`s (itemCount = `levelList.length - 1` to hide customize slot). Runs `AppUpdate(context)` + `AppRating(context)` once per app run (guarded by global `_dialogShow`). |
-| `design_level.dart` | `/designLevel` | Level editor: 600-cell grid, tap toggles blocks (snake start cells protected), target score +/-10 (hold to auto-repeat), info dialog, SAVE & PLAY (persists via `LevelController(999)`, replaces `levelList[31]`, starts game), Reset. |
+| `design_level.dart` | `/designLevel` | Level editor: 600-cell grid, tap toggles blocks (snake start cells protected), target score +/-10 (hold to auto-repeat), info dialog, SAVE & PLAY (persists via `LevelController(999)`, starts game via `StagePlay.start(31)` which restores from prefs), Reset. |
 | `play_screen.dart` | `/PlayScreen` | Main playing screen (see §7). |
-| `loading_screen.dart` | `LoadingScreen` | Plain spinner screen — registered but **not referenced** in the navigated flow. |
 
 ---
 
 ## 6. Widgets (lib/widget/ + gaf_package/)
 
 ### Game/widget rendering
-- `widget/cell/cell.dart` — builds a board cell for a `CellType`: blocks (neon dots on dark), snake segments (rounded bars), snake **head** (with eyes, oriented by direction), snake **corners**, food (neon), special food (neon with `?` icon). Uses `CellProp` + `RotatedBox(quarterTurns)` + `AnimatedContainer`. **Since 2026-09-11 colors come from the active `AppColor` palette** (`snakeColor`, `foodColor`, `blockColor`, `glowColor`); the 5 neon themes now drive the playfield, not just chrome.
+- `widget/play_screen_widget/play_board.dart` — `PlayBoard` + `BoardPainter` (CustomPainter): builds `ListenableBuilder` from `StagePlay` grid, anchors body path to interpolated head position (`_headCenter`), breaks stroke at non-adjacent cells and wrap seams (no torus-wrap adjacency). No tail fade (removed).
+- `widget/cell/cell.dart` — builds a board cell for a `CellType`: blocks (neon dots on dark), snake segments (rounded bars), snake **head** (with eyes, oriented by direction), snake **corners**, food (neon), special food (neon with `?` icon). Uses `CellProp` + `RotatedBox(quarterTurns)` + `AnimatedContainer`. **Since 2026-09-11 colors come from the active `AppColor` palette** (`snakeColor`, `foodColor`, `blockColor`, `glowColor`); the 5 neon themes now drive the playfield, not just chrome. `cell.dart`, `snake_eye.dart`, `snake_corner.dart` are also used by the level editor (`design_level.dart`).
 - `widget/game_menu.dart` — the pause/game-over overlay: `BackdropFilter` blur scrim, slide-up neon panel, `Orbitron` glowing title, count-up score (via `AnimatedNumber`). Buttons: Continue (rewarded video for extra life), Resume/Restart, Option, Back To Main, Exit. Renders `AskToMoveNextLevel` when `showAskMenu`.
-- `widget/ask_to_move_next_level.dart` — congratulation dialog (emoji-heavy) to proceed to next level or keep playing current.
+- `widget/ask_to_move_next_level.dart` — congratulation dialog (clean neon copy) to proceed to next level or keep playing current.
 - `widget/option_menu.dart` — AlertDialog (glow-bordered): sound toggle, music toggle, color-theme dropdown (5 neon themes), Read Privacy Policy link (Google Sites URL).
 - `widget/play_screen_widget/top_section.dart` — neon HUD panel: ad banner, LEVEL chip, `TimerLine` (play time + reward countdown + settings button), `ScoreLine` (TARGET/SCORE/HIGH badge chips with `AnimatedNumber` count-up). Settings button toggles pause + opens menu.
 - `widget/play_screen_widget/tap_to_play.dart` — full-screen "Tap to Play" overlay; first tap starts the game+clock.
@@ -176,6 +174,7 @@ lib/
 - `widget/play_screen_widget/screen_shake.dart` — board shake on game-over rising edge.
 - `widget/play_screen_widget/neon_grid.dart` — `NeonGridPainter`, faint grid lines behind the playfield.
 - `helper/swipe.dart` — pure `resolveSwipe()` steering resolver (drag threshold + 180° reversal guard), unit-tested in `test/swipe_test.dart`.
+- `widget/play_screen_widget/d_pad.dart` — optional on-screen D-pad (4 semi-transparent neon buttons), feeds `StagePlay.changeDirect()`, widget-tested in `test/d_pad_test.dart`.
 - `widget/stage_icon.dart` — level tile in the grid; reads unlock state (`LevelController(stageId-1).getLevelState()`), Survival always enabled, locked tiles dimmed.
 - `widget/main_menu_button.dart`, `gaf_button.dart`, `gaf_item.dart`, `gaf_text.dart`, `gaf_back_button.dart`, `gaf_rasid_button.dart`, `gaf_change_value_button.dart`, `gaf_dialog.dart`, `converted_icon.dart` (animated toggle icon), `snake_corner.dart`, `snake_eye.dart`, `stage_icon.dart`.
 
@@ -206,7 +205,9 @@ lib/
 ### Snake
 - Starting body `[30, 50, 70, 90]`, starts moving `Down`, head = body.last (index 90).
 - Movement is **toroidal**: off the top wraps to bottom, off left wraps to rightmost of same row-line logic (`helper/snake.dart:101-133`).
-- Controlled by swipe anywhere over the play area: `SwipeSteer` (in `play_screen.dart`) feeds `helper/swipe.dart`'s `resolveSwipe()` — a turn fires only after the drag passes `GameSize().width()*.015` on the dominant axis (with a small `HapticFeedback`), forbidding a 180° reversal into the current direction.
+- Controlled by swipe anywhere over the play area: `SwipeSteer` (in `play_screen.dart`) feeds `helper/swipe.dart`'s `resolveSwipe()` — a turn fires only after the drag passes `GameSize().width()*.015` on the dominant axis (with a small `HapticFeedback`), forbidding a 180° reversal into the current direction. Input is queued (max 2): `setDirect()` drops the oldest front on overflow and blocks reversals of the queued front.
+- **Optional on-screen D-pad** (since 2026-09-14): toggle "Game Pad On/Off" in the Option dialog (`option_menu.dart`) persists under `dPadState`; when on, `widget/play_screen_widget/d_pad.dart` overlays 4 semi-transparent neon arrow buttons bottom-right of the board, feeding the same `changeDirect()` queue. Inert when `gameOver`/`requestLife`.
+- `StagePlay.start()` refactored: normal levels read `levelList[levelID]` directly; custom level (`levelID == levelList.length-1`) branches to `_setupCustomLevel()` (async) which calls `LevelController(999).levelRestore()` then builds a fresh `LevelModel` from the saved data and `LevelController.customBlocks` — the global `levelList` is never mutated.
 
 ### Main loop (`providers/stagePlay.dart`)
 - `StagePlay.gamePlay()` starts `Timer.periodic(Duration(milliseconds: Manager.gameSpeed))` (default 300ms = `KDefaultGameSpeed`).
@@ -217,7 +218,7 @@ lib/
   - Special food (`sFood`) → `Stage.eatingSFood()`: applies a random reward via `SpecialFood()`, starts reward countdown.
 - Speed changes are handled by cancelling the timer and re-calling `gamePlay()` with the new duration.
 - Target reached (score ≥ `level.targetScore`) → `LevelController.setLevelState()` unlocks the next level, plays `snaketargetdone.mp3`, and once (unless already asked) opens the "move to next level" prompt (`showAskMenu`), pausing the game. Survival (rank 0) and Custom (rank 999) skip this.
-- High score → persisted via `LevelController.setLevelHighScore`, `snakehieghscorebreak.mp3` on first break.
+- High score → persisted via `LevelController.setLevelHighScore` **only on a strict beat** (`>`, a tie does nothing); on the first beat `snakehieghscorebreak.mp3` plays **and** a new celebration FX fires (`StagePlay.fxHScorePulse` bumps, `GameEffects` draws a big double-ring burst + rising "NEW HIGH SCORE" Orbitron text + whole-board glow tint, and the HIGH HUD chip flashes foodColor via a one-shot `TweenAnimationBuilder`).
 - Death: `Manager.requestLife` set; if extra life already taken (`isExtraLifeTaken`) → game over. Otherwise pause + overlay "Continue" button → rewarded ad (watch → `giveExtraLife()` = IMMORTAL for 30s).
 
 ### Special food (`view_model/special_food.dart`)
@@ -248,6 +249,7 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 | `colorKey` | int | AppColorController | Theme index 0–4 |
 | `soundState` | bool | GameSound | SFX on/off |
 | `musicState` | bool | GameSound | music on/off |
+| `dPadState` | bool | Manager | on-screen D-pad on/off |
 | `stage_state{rank}` | bool | LevelController | level unlocked (rank 0 set true at splash) |
 | `stage_high_score{rank}` | int | LevelController | personal best (>= 0) |
 | `blocks_list{rank}` | String list | LevelController | custom level block indices (rank 999) |
@@ -259,7 +261,7 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 
 ## 9. Known Issues / Technical Debt (verified by code reading)
 
-1. **Widget/game-logic tests** — counter-template `widget_test.dart` was **replaced 2026-09-11** by a neon-palette test; unit tests now exist for `resolveSwipe` (`swipe_test.dart`), `Snake` (movement/wrap/eat/die), `LevelController` (prefs), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` version compare, and `StagePlay` start/score/unlock paths. `integration_test/app_test.dart` and `driver.dart` remain fully commented out. Game-loop ticking itself is not yet driven under test.
+1. **Widget/game-logic tests** — **FIXED 2026-09-14**. 50 tests now pass: `Snake` (movement/wrap/input-queue/die), `resolveSwipe` (`swipe_test.dart`), `LevelController` (prefs/unlock), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` compare, `StagePlay` (start/score/unlock/decoupling), `GameSound` (pause/resume), and game-loop tick timing via fakeAsync (`loop_test.dart` — tick advancing, eating, pause/gameOver guards, special-food spawn+15s expiry).
 2. **AppUpdate cast bug** — **FIXED 2026-09-11**. `_getVersion` is now a typed `Uri` (single slash); fetch wrapped in `try/catch` (network error → no dialog, no crash); body cleaning checks `statusCode==200` and strips quotes only when present.
 3. **AppUpdate version compare bug** — **FIXED 2026-09-11**. `haveLastVersion` is a static numeric part-by-part compare (padded for unequal lengths, non-numeric segments ignored) — unit-tested.
 4. **Rewarded ad race (reward leak)** — **FIXED 2026-09-11**. `RewardedHelperAd` now preloads + caches one ad (`ensureLoaded()`, shared `Completer` guard, concurrency safe); `showAd` awaits the load and shows the cached ad; `runReward` can only fire inside `onUserEarnedReward` (i.e. after a real completed ad), and the ad is disposed on dismiss/fail-to-show.
@@ -267,12 +269,12 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 6. **Theme only partially applied** — **FIXED 2026-09-11**. Playfield (`Cell`, `SnakeCorner`, `PlayScreen`, food/block/special-food) now reads `snakeColor`/`foodColor`/`blockColor`/`glowColor` from the active neon `AppColor`. `AppColor.playStageColor` remains unused/vestigial (keep in sync if the field is ever wired).
 7. **Global mutable state everywhere**: `Manager` is a static grab-bag (flags, speed, score, snake, blocks, food…), heavily mutated from models/helpers/screens. Makes logic order-dependent and hard to test; several resets (`endGame`, `startGame`) must be kept in sync manually.
 8. **Timer management fragility** — **FIXED 2026-09-11**. Single `Timer? gameTimer` guarded by `isActive` in `gamePlay()` (no ghost timers from resume/speed-change/restart callers); pause idles instead of cancelling; only speed-change re-creates. Special-food spawn uses a cancellable `Timer? _sfTimer` (cancelled in `endGame`/`start`) and skips when `gameOver`; one nested 15s `Future.delayed` per candidate remains.
-9. **Level/data coupling**: `levelList` is a mutable global; `DesignLevel` overwrites `levelList[31]` at runtime. `Position` model exists but the game mostly works on raw indices (blocks/snake as `List<int>`).
+9. **Level/data decoupling** — **FIXED 2026-09-14**. `StagePlay.start()` branches custom levels to async `_setupCustomLevel()` which restores from prefs; `DesignLevel` no longer mutates global `levelList[31]`; `Position` model removed.
 10. **Global `_dialogShow`** in `stages_screen.dart` is a file-level bool (not per-screen-instance): update+rating dialogs shown once per app lifetime by design.
 11. **`RewardedHelperAd`/`toast` "No Ad Available"** — **FIXED 2026-09-11**. The toast now fires only when a load actually fails (not while genuinely loading), falling out of the new load/cache/show flow (see #4).
-12. **Animal/flavor text**: `ask_to_move_next_level.dart` uses emoji in UI strings and a typo apostrophe `I'm` etc. App is **English-only** (RTL/Arabic not implemented despite skill guidelines — do not assume multilinguality).
+12. **Animal/flavor text** — **FIXED 2026-09-14**. Emoji removed from `ask_to_move_next_level.dart`, `I'm` apostrophe and `notch?.` double-punctuation fixed. App is **English-only** (RTL/Arabic not implemented despite skill guidelines — do not assume multilinguality).
 13. **`AppUpdate` endpoint** — double slash `...//version.json` **FIXED 2026-09-11** (now `.../version.json`). Still plain-HTTP to `firebaseio.com` (accept that; do not add HTTPS pinning/TLS work unless asked).
-14. `loading_screen.dart` is dead code (registered route, never navigated to).
+14. `loading_screen.dart` — **DELETED 2026-09-14** (dead code: registered route, never navigated to).
 15. **No secure upgrade path**: AdMob IDs and app/package IDs are hardcoded constants (fine for this project — do not "externalize" them into keys/config without being asked).
 
 ---
@@ -295,16 +297,17 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 ## 11. Suggested Improvement Order (if asked to work on the project)
 
 > **2026-09-11 repair pass** resolved #2, #3, #4, #8, #11, #13 and added the game-logic test suite (see §9), plus the neon landing/level-editor sweep and the low-end knobs (`KMenuBlurSigma`, `KGlowStrength` in `constant.dart`).
+> **2026-09-14 pass** resolved #1 (loop-tick fakeAsync tests), #9 (level decoupling), #12 (flavor text), #14 (dead loading_screen + position.dart removed) and added the optional D-pad; `fake_async` promoted to `dev_dependencies`.
 
 Remaining / next candidates:
 
 1. Decide whether global `Manager` state → provider/state class refactor is warranted (#7, bigger change — do not do unprompted).
-2. Drive the game-loop tick itself under a test (fakeAsync / pump) for `_eating`/`_isaLife`/special-food timing, incl. the surviving nested 15s `Future.delayed` in `_showSpecialFood` (#8 remnant).
-3. Level/data decoupling (#9): stop mutating global `levelList[31]`; the `Position` model is unused.
-4. Remove dead `loading_screen.dart` route + `main.dart` registrations (#14).
-5. Flavor-text cleanup (#12): emoji in `ask_to_move_next_level.dart`, apostrophe typo.
-6. On-screen D-pad (marketing) or landing/editor art pass if demanded; else keep swipe-only.
+2. ~~Drive game-loop tick under test~~ — **DONE 2026-09-14** (`loop_test.dart` via fakeAsync).
+3. ~~Level/data decoupling~~ — **DONE 2026-09-14** (`_setupCustomLevel()` restores from prefs; `Position` deleted).
+4. ~~Remove dead `loading_screen.dart`~~ — **DONE 2026-09-14**.
+5. ~~Flavor-text cleanup~~ — **DONE 2026-09-14** (emoji removed, apostrophe/punctuation fixed).
+6. ~~On-screen D-pad~~ — **DONE 2026-09-14** (optional, toggle in Option dialog, persisted `dPadState`). Landing/editor art pass still only if demanded.
 
 ---
 
-*End of project context. Generated from full source reading on 2026-09-11. Keep this document updated when the code changes significantly.*
+*End of project context. Generated from full source reading on 2026-09-11, updated 2026-09-14. Keep this document updated when the code changes significantly.*

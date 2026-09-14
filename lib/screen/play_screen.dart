@@ -10,6 +10,7 @@ import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
 import '../view_model/manager.dart';
 import '../widget/game_menu.dart';
+import '../widget/play_screen_widget/d_pad.dart';
 import '../widget/play_screen_widget/game_effects.dart';
 import '../widget/play_screen_widget/neon_grid.dart';
 import '../widget/play_screen_widget/play_board.dart';
@@ -98,6 +99,12 @@ class PlayScreen extends StatelessWidget {
               height: GameSize().getStageHeight().toDouble(),
               child: GameEffects(),
             ),
+            if (Manager.dPadEnabled)
+              Positioned(
+                right: GameSize().sideMargin() / 2 + cell * .3,
+                bottom: GameSize().sideMargin() / 2 + cell * .3,
+                child: DPad(),
+              ),
             GameMenu(
               visible: stagePlay.showMenu,
               isPause: Manager.isPause,

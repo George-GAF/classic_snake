@@ -30,6 +30,7 @@ class StagePlay extends ChangeNotifier {
   int frame = 0;
 
   int fxPulse = 0;
+  int fxHScorePulse = 0;
   int eatenAt = -1;
   bool fxIsSpecial = false;
 
@@ -87,6 +88,10 @@ class StagePlay extends ChangeNotifier {
 
   bool isTargetBroken() {
     return _targetBroken;
+  }
+
+  bool isHScoreBroken() {
+    return _hScoreBroken;
   }
 
   void hideTapMassage() {
@@ -166,14 +171,15 @@ class StagePlay extends ChangeNotifier {
         _askToMoveToNextLevel();
       }
     }
-    if (_score >= _hScore) {
+    if (_score > _hScore) {
       _hScore = _score;
-      if (_score > _lastPersistedHighScore) {
-        _lastPersistedHighScore = _score;
-        controller!.setLevelHighScore(_score);
-      }
+    }
+    if (_score > _lastPersistedHighScore) {
+      _lastPersistedHighScore = _score;
+      controller!.setLevelHighScore(_score);
       if (!_hScoreBroken) {
         _hScoreBroken = true;
+        fxHScorePulse++;
         GameSound.playSoundEffect(KHeightScoreBreakFileSound);
       }
     }
@@ -249,7 +255,28 @@ class StagePlay extends ChangeNotifier {
     _session++;
     Manager.startGame();
     Manager.currentStageID = levelID;
-    level = levelList[levelID];
+    if (levelID == levelList.length - 1) {
+      _setupCustomLevel();
+      return;
+    }
+    _beginLevel(levelList[levelID], levelID);
+  }
+
+  Future<void> _setupCustomLevel() async {
+    final restored = await LevelController(999).levelRestore();
+    _beginLevel(
+      LevelModel(
+        rank: 999,
+        enable: true,
+        targetScore: restored.targetScore,
+        blocks: LevelController.customBlocks,
+      ),
+      levelList.length - 1,
+    );
+  }
+
+  void _beginLevel(LevelModel levelModel, int levelID) {
+    level = levelModel;
     if (kDebugMode) {
       print('id = $levelID level detail ${level.toString()}');
     }
@@ -260,6 +287,7 @@ class StagePlay extends ChangeNotifier {
     _lastPersistedHighScore = 0;
     _targetBroken = false;
     _hScoreBroken = false;
+    fxHScorePulse = 0;
     showTapMassage = true;
     showMenu = false;
     _isAskedToMoveToNextLevel = false;

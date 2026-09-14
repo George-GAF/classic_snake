@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constant/constant.dart';
 import '../view_model/app_color.dart';
 import '../view_model/game_size.dart';
+import '../view_model/manager.dart';
 import '../view_model/sound_controller.dart';
 import '../widget/gaf_item.dart';
 import 'converted_icon.dart';
@@ -165,6 +166,34 @@ class OptionMenu extends StatelessWidget {
                               .toList(),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                paddingH: _width * .06,
+                radius: _width * .02,
+              ),
+              GAFItem(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GAFText(
+                        Manager.dPadEnabled ? 'Game Pad On' : 'Game Pad Off',
+                        fontSize: _width * .05,
+                        softWrap: false,
+                      ),
+                    ),
+                    SizedBox(
+                      width: _width * .02,
+                    ),
+                    ConvertIcon(
+                      onPressed: () {
+                        GameSound.playSoundEffect(KButtonClick);
+                        Manager.switchDPadSetting();
+                      },
+                      milliseconds: 200,
+                      switchValue: Manager.dPadEnabled,
+                      onIcon: Icons.gamepad_rounded,
+                      offIcon: Icons.touch_app_rounded,
                     ),
                   ],
                 ),
