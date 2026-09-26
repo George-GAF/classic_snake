@@ -46,7 +46,8 @@ class TopPart extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(horizontal: width * .02, vertical: width * .015),
+      padding:
+          EdgeInsets.symmetric(horizontal: width * .02, vertical: width * .015),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -65,6 +66,7 @@ class TopPart extends StatelessWidget {
           TimerLine(
             isReward: isReward,
           ),
+          if (stage?.rank != 0) const _ProgressStrip(),
           ScoreLine(),
           const SizedBox(height: 4),
         ],
@@ -92,7 +94,7 @@ class _HudChip extends StatelessWidget {
         border: Border.all(color: colors.glowColor.withOpacity(.4)),
       ),
       child: GAFText(
-        value,
+        label != null ? '$label $value' : value,
         fontSize: size ?? fontSize,
         fontWeight: FontWeight.w900,
         glowColor: colors.glowColor,
@@ -257,6 +259,73 @@ class TimerLine extends StatelessWidget {
   }
 }
 
+class _ProgressStrip extends StatelessWidget {
+  const _ProgressStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    final play = context.watch<StagePlay>();
+    final colors = context.watch<AppColorController>().getColors();
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _MiniChip(
+              label: '${play.currentStars} \u2605',
+              accent: colors.glowColor,
+            ),
+            if (play.paceLabel.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              _MiniChip(
+                label: play.paceLabel,
+                accent: colors.glowColor,
+              ),
+            ],
+          ],
+        ),
+        if (play.comboMultiplier > 0)
+          Positioned(
+            right: 0,
+            child: _MiniChip(
+              label: 'COMBO \u00d7${play.comboMultiplier}',
+              accent: colors.foodColor,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MiniChip extends StatelessWidget {
+  final String label;
+  final Color accent;
+
+  const _MiniChip({required this.label, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.watch<AppColorController>().getColors();
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: width * .02, vertical: height * .002),
+      decoration: BoxDecoration(
+        color: colors.basicColor.withOpacity(.7),
+        borderRadius: BorderRadius.circular(width * .02),
+        border: Border.all(color: accent.withOpacity(.4)),
+      ),
+      child: GAFText(
+        label,
+        fontSize: fontSize * .75,
+        fontWeight: FontWeight.w900,
+        glowColor: accent,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
 class GameSettingButton extends StatelessWidget {
   const GameSettingButton({
     super.key,
@@ -326,7 +395,9 @@ class ScoreLine extends StatelessWidget {
             value: '${stage!.targetScore}',
           ),
         _HudBadge(
-          accent: isBroken && stage?.rank != 0 ? colors.glowColor : colors.foodColor,
+          accent: isBroken && stage?.rank != 0
+              ? colors.glowColor
+              : colors.foodColor,
           label: 'SCORE',
           value: score,
           bold: isBroken,
@@ -377,10 +448,8 @@ class Reward extends StatelessWidget {
             fontWeight: FontWeight.w900,
             fontSize: fontSize,
             softWrap: true,
-            glowColor: context
-                .watch<AppColorController>()
-                .getColors()
-                .glowColor,
+            glowColor:
+                context.watch<AppColorController>().getColors().glowColor,
           ),
           const SizedBox(
             width: 5,

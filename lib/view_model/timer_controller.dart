@@ -16,6 +16,8 @@ class GameTimer {
     return timerText;
   }
 
+  static int elapsedSeconds() => _hour * 3600 + _minute * 60 + _second;
+
   static void manageTimer() {
     if (Manager.gameRun && !Manager.gameOver && !Manager.isPause) {
       if (!_timerRun) {

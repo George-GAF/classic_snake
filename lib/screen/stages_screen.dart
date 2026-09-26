@@ -53,6 +53,34 @@ class StageScreen extends StatelessWidget {
                       fontSize: width * .1,
                       glowColor: color.getColors().glowColor,
                     )),
+                    Padding(
+                      padding: EdgeInsets.only(right: width * .02),
+                      child: FutureBuilder<int>(
+                        future: Manager.refreshTotalStars(),
+                        builder: (cont, snap) {
+                          final total = snap.data ?? Manager.totalStars;
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: width * .03, vertical: width * .015),
+                            decoration: BoxDecoration(
+                              color: color.getColors().menuColor.withOpacity(.35),
+                              borderRadius: BorderRadius.circular(width * .03),
+                              border: Border.all(
+                                  color: color
+                                      .getColors()
+                                      .glowColor
+                                      .withOpacity(.4)),
+                            ),
+                            child: GAFText(
+                              '\u2605 $total / ${Manager.maxStars}',
+                              fontSize: width * .05,
+                              fontWeight: FontWeight.w700,
+                              glowColor: color.getColors().glowColor,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
                 Expanded(

@@ -3,6 +3,7 @@ import 'package:classic_snake/providers/stagePlay.dart';
 import 'package:classic_snake/view_model/game_size.dart';
 import 'package:classic_snake/view_model/manager.dart';
 import 'package:classic_snake/view_model/sound_controller.dart';
+import 'package:classic_snake/view_model/timer_controller.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +48,85 @@ void main() {
       stagePlay.gamePlay();
       async.elapse(Duration(milliseconds: tick));
       expect(Manager.gameScore, KEatScoreValue);
+    });
+  });
+
+  test('consecutive eats within the window ramp the combo score', () {
+    fakeAsync((async) {
+      stagePlay.start(0);
+      stagePlay.gamePlay();
+      void eatNext() {
+        final step = GameSize().cellInRow();
+        stagePlay.stage!.food = stagePlay.snake!.getBody().last + step;
+        Manager.food = stagePlay.stage!.food;
+        async.elapse(Duration(milliseconds: tick));
+      }
+
+      eatNext();
+      expect(stagePlay.fxScore, 10);
+      expect(stagePlay.comboMultiplier, 1);
+      expect(Manager.gameScore, 10);
+      eatNext();
+      expect(stagePlay.fxScore, 12);
+      expect(stagePlay.comboMultiplier, 2);
+      expect(Manager.gameScore, 22);
+      eatNext();
+      expect(stagePlay.fxScore, 15);
+      expect(stagePlay.comboMultiplier, 3);
+      expect(Manager.gameScore, 37);
+      eatNext();
+      expect(stagePlay.fxScore, 20);
+      expect(stagePlay.comboMultiplier, 4);
+      expect(Manager.gameScore, 57);
+      eatNext();
+      expect(stagePlay.fxScore, 20);
+      expect(stagePlay.comboMultiplier, 4);
+      expect(Manager.gameScore, 77);
+    });
+  });
+
+  test('combo resets to the base score after KComboResetSeconds without eating',
+      () {
+    fakeAsync((async) {
+      stagePlay.start(0);
+      stagePlay.gamePlay();
+      void eatNext() {
+        final step = GameSize().cellInRow();
+        stagePlay.stage!.food = stagePlay.snake!.getBody().last + step;
+        Manager.food = stagePlay.stage!.food;
+        async.elapse(Duration(milliseconds: tick));
+      }
+
+      eatNext();
+      eatNext();
+      expect(stagePlay.fxScore, 12);
+      async.elapse(Duration(seconds: KComboResetSeconds) +
+          const Duration(milliseconds: 1));
+      expect(stagePlay.comboMultiplier, 0);
+      eatNext();
+      expect(stagePlay.fxScore, 10);
+      expect(stagePlay.comboMultiplier, 1);
+      expect(Manager.gameScore, 32);
+    });
+  });
+
+  test('breaking the target on time records the earned stars', () {
+    fakeAsync((async) async {
+      stagePlay.start(1);
+      Manager.gameRun = true;
+      GameTimer.manageTimer();
+      async.elapse(const Duration(seconds: 1));
+      Manager.gameScore = 310;
+      stagePlay.testingScoreAndHScore();
+      async.flushMicrotasks();
+      expect(await stagePlay.controller!.getLevelStars(), 3);
+      expect(stagePlay.earnedStars, 3);
+      expect(stagePlay.earnedTime, 1);
+      expect(stagePlay.bestTime, 1);
+      expect(StagePlay.formatTime(60), '1:00');
+      async.flushMicrotasks();
+      Manager.gameOver = true;
+      GameTimer.manageTimer();
     });
   });
 

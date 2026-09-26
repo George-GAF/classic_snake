@@ -8,6 +8,8 @@ class LevelController {
 
   final String _levelState = 'stage_state';
   final String _levelHighScore = 'stage_high_score';
+  final String _levelStars = 'stage_stars';
+  final String _levelBestTime = 'stage_best_time';
   final String _levelBlocksIndex = 'blocks_list';
   final String _levelTarget = 'level_target';
 
@@ -53,6 +55,30 @@ class LevelController {
   Future<int> getLevelHighScore() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getInt('$_levelHighScore$rank') ?? 0;
+  }
+
+  Future<void> setLevelStars(int stars) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final old = pref.getInt('$_levelStars$rank') ?? 0;
+    if (stars > old) await pref.setInt('$_levelStars$rank', stars);
+  }
+
+  Future<int> getLevelStars() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getInt('$_levelStars$rank') ?? 0;
+  }
+
+  Future<void> setLevelBestTime(int seconds) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final old = pref.getInt('$_levelBestTime$rank') ?? 0;
+    if (old == 0 || seconds < old) {
+      await pref.setInt('$_levelBestTime$rank', seconds);
+    }
+  }
+
+  Future<int> getLevelBestTime() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getInt('$_levelBestTime$rank') ?? 0;
   }
 
   Future<bool> levelSave(int target, List<int> blocks) async {

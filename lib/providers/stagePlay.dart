@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../constant/constant.dart';
 import '../constant/enum_file.dart';
+import '../constant/game_values.dart';
 import '../helper/snake.dart';
 import '../helper/stage.dart';
 import '../model/level_model.dart';
@@ -15,6 +16,7 @@ import '../view_model/special_food.dart';
 import '../view_model/timer_controller.dart';
 
 class StagePlay extends ChangeNotifier {
+  static const List<int> _comboGains = [10, 12, 15, 20];
   Snake? snake;
   Stage? stage;
   LevelModel? level;
@@ -43,14 +45,44 @@ class StagePlay extends ChangeNotifier {
   Timer? _sfTimer;
   int _session = 0;
 
+  int _combo = 0;
+  Timer? _comboTimer;
+  int fxScore = KEatScoreValue;
+
+  int earnedStars = 0;
+  int earnedTime = 0;
+  int bestTime = 0;
+
   Uint8List get grid => _grid;
 
   int get highScore => _hScore;
 
+  int get comboMultiplier => _combo;
+
+  int get currentStars =>
+      starsFor(GameTimer.elapsedSeconds(), level?.targetTime ?? 0);
+
+  String get paceLabel =>
+      paceLabelFor(GameTimer.elapsedSeconds(), level?.targetTime ?? 0);
+
+  static String paceLabelFor(int elapsed, int par) {
+    if (par <= 0) return '';
+    final half = par ~/ 2;
+    final stars = starsFor(elapsed, par);
+    if (stars == 3) return '\u26053 in ${formatTime(half - elapsed)}';
+    if (stars == 2) return '\u26052 in ${formatTime(par - elapsed)}';
+    return '\u26051';
+  }
+
+  static String formatTime(int seconds) {
+    final s = seconds < 0 ? 0 : seconds;
+    return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  }
+
   void gamePlay() {
     if (gameTimer?.isActive ?? false) return;
-    gameTimer = Timer.periodic(
-        Duration(milliseconds: Manager.gameSpeed), (timer) {
+    gameTimer =
+        Timer.periodic(Duration(milliseconds: Manager.gameSpeed), (timer) {
       if (Manager.isChangeGameSpeed) {
         timer.cancel();
         gameTimer = null;
@@ -94,6 +126,13 @@ class StagePlay extends ChangeNotifier {
     return _hScoreBroken;
   }
 
+  static int starsFor(int elapsed, int parTime) {
+    if (parTime <= 0) return 0;
+    if (elapsed <= parTime ~/ 2) return 3;
+    if (elapsed <= parTime) return 2;
+    return 1;
+  }
+
   void hideTapMassage() {
     showTapMassage = false;
     notifyListeners();
@@ -132,7 +171,8 @@ class StagePlay extends ChangeNotifier {
         break;
       case FoodType.Food || FoodType.GiftFood:
         GameSound.playSoundEffect(KEatFileSound);
-        stage!.addScore();
+        _bumpCombo();
+        stage!.addScore(fxScore);
         testingScoreAndHScore();
         _triggerFx(false);
         if (type == FoodType.Food) {
@@ -156,6 +196,16 @@ class StagePlay extends ChangeNotifier {
     fxPulse++;
   }
 
+  void _bumpCombo() {
+    _comboTimer?.cancel();
+    _combo = _combo >= 4 ? 4 : _combo + 1;
+    fxScore = _comboGains[_combo - 1];
+    _comboTimer = Timer(Duration(seconds: KComboResetSeconds), () {
+      _combo = 0;
+      notifyListeners();
+    });
+  }
+
   int stageCurrentScore() {
     Manager.gameScore = Manager.gameScore < 0 ? 0 : Manager.gameScore;
     return Manager.gameScore;
@@ -166,6 +216,17 @@ class StagePlay extends ChangeNotifier {
     if (_score >= level!.targetScore! && !_targetBroken) {
       _targetBroken = true;
       controller!.setLevelState();
+      final elapsed = GameTimer.elapsedSeconds();
+      if (elapsed > 0 && level!.rank != 0 && level!.rank != 999) {
+        final stars = starsFor(elapsed, level!.targetTime);
+        earnedStars = stars;
+        earnedTime = elapsed;
+        controller!.setLevelStars(stars);
+        controller!.setLevelBestTime(elapsed);
+        controller!.getLevelBestTime().then((t) {
+          bestTime = t;
+        });
+      }
       GameSound.playSoundEffect(KTargetDoneFileSound);
       if (!_isAskedToMoveToNextLevel) {
         _askToMoveToNextLevel();
@@ -277,6 +338,8 @@ class StagePlay extends ChangeNotifier {
 
   void _beginLevel(LevelModel levelModel, int levelID) {
     level = levelModel;
+    Manager.gameSpeed = levelModel.speed;
+    Manager.levelBaseSpeed = levelModel.speed;
     if (kDebugMode) {
       print('id = $levelID level detail ${level.toString()}');
     }
@@ -288,10 +351,16 @@ class StagePlay extends ChangeNotifier {
     _targetBroken = false;
     _hScoreBroken = false;
     fxHScorePulse = 0;
+    earnedStars = 0;
+    earnedTime = 0;
+    bestTime = 0;
     showTapMassage = true;
     showMenu = false;
     _isAskedToMoveToNextLevel = false;
     showAskMenu = false;
+    _combo = 0;
+    _comboTimer?.cancel();
+    fxScore = KEatScoreValue;
     _reindex();
     controller!.getLevelHighScore().then((value) {
       _hScore = value;
@@ -306,6 +375,10 @@ class StagePlay extends ChangeNotifier {
     gameTimer = null;
     _sfTimer?.cancel();
     _sfTimer = null;
+    _comboTimer?.cancel();
+    _comboTimer = null;
+    _combo = 0;
+    fxScore = KEatScoreValue;
     _session++;
     Manager.endGame();
     notifyListeners();

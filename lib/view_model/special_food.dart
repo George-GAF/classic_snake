@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import '../constant/constant.dart';
-import '../constant/game_values.dart';
 import 'game_size.dart';
 import 'manager.dart';
 import 'sound_controller.dart';
@@ -50,8 +49,8 @@ class SpecialFood {
       Manager.isSFoodEating = false;
       //Manager.gameScore = 0;
       Manager.seconds = 0;
-      if (Manager.gameSpeed != KDefaultGameSpeed) {
-        Manager.changeGameSpeed(KDefaultGameSpeed);
+      if (Manager.gameSpeed != Manager.levelBaseSpeed) {
+        Manager.changeGameSpeed(Manager.levelBaseSpeed);
       }
       if (Manager.isMustChangeSnakeColor)
         Manager.isMustChangeSnakeColor = false;
@@ -64,8 +63,6 @@ class SpecialFood {
     GameSound.playSoundEffect(KGoodLuckFileSound);
     return 'IMMORTAL';
   }
-
-
 
   String _increaseScore() {
     _giftBonus = 0;
@@ -86,6 +83,7 @@ class SpecialFood {
   }
 
   String _gameOver() {
+    if (Manager.currentStageID != 0) return _increaseScore();
     Manager.gameOver = true;
     return 'Game Over';
   }
@@ -100,14 +98,16 @@ class SpecialFood {
 
   String _increaseSpeed() {
     Manager.seconds = 55;
-    Manager.changeGameSpeed(KDefaultGameSpeed - (Random().nextInt(50) + 40));
+    Manager.changeGameSpeed(
+        Manager.levelBaseSpeed - (Random().nextInt(50) + 40));
     GameSound.playSoundEffect(KBadLuckFileSound);
     return 'Increase Speed';
   }
 
   String _decreaseSpeed() {
     Manager.seconds = 55;
-    Manager.changeGameSpeed(KDefaultGameSpeed + (Random().nextInt(50) + 40));
+    Manager.changeGameSpeed(
+        Manager.levelBaseSpeed + (Random().nextInt(50) + 40));
     GameSound.playSoundEffect(KGoodLuckFileSound);
     return 'Decrease Speed';
   }
@@ -135,14 +135,8 @@ class CreateGiftFoodIndex {
   bool _isValueOk(int value) {
     if (Manager.giftFoods.contains(value) ||
         Manager.snake.contains(value) ||
-        value == Manager.food) return false;
-
-    /*
-    else if (GameSize.blockIndex.contains(value))
-      return false;
-    else if (Manager.snakeBody.contains(value))
-      return false;
-    else if (Manager.snakeFood == value) return false;*/
+        value == Manager.food ||
+        Manager.blocks.contains(value)) return false;
     return true;
   }
 }

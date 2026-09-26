@@ -20,7 +20,7 @@
 | Type | Flutter mobile game (portrait-only, fullscreen) |
 | Primary target | Android (Google Play) — AdMob configured for Android only |
 | Author credit | "Made By GAF-Programing 2023" (shown in menu) |
-| Description | Classic snake with 30 unlockable levels (block obstacles + target score), a free "Survival" mode, a custom level editor, special bonus foods with random effects, and rewarded-video extra life |
+| Description | Classic snake with 30 unlockable levels (block obstacles + target score with a 30s–3min per-level speed and star rating), a free "Survival" mode, a custom level editor, combo scoring, special bonus foods with random effects, and rewarded-video extra life |
 
 ### Platform folders
 `android/`, `ios/`, `web/`, `windows/` all exist. **Android is the real product target.**
@@ -53,7 +53,7 @@
 ### Commands
 - Analyze: `flutter analyze` (or `dart analyze`)
 - Stage grid is unitless / index-only, so most logic can run headless for tests.
-- Tests: `flutter test` — **52 tests** covering `Snake` (movement/wrap/input queue/die), `resolveSwipe`, `LevelController` (prefs/unlock), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate`, `StagePlay` (start/score/unlock/decoupling), `GameSound` (pause/resume), the D-pad widget, and game-loop tick timing (`loop_test.dart` via fakeAsync).
+- Tests: `flutter test` — **68 tests** covering `Snake` (movement/wrap/input queue/die), `resolveSwipe`, `LevelController` (prefs/unlock/stars/best-time), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate`, `StagePlay` (start/score/unlock/decoupling/currentStars/paceLabel/formatTime), `StageIcon` (star tile overflow + star-ownership fix + PAR line), `GameSound` (pause/resume), the D-pad widget, and game-loop tick timing (`loop_test.dart` via fakeAsync, incl. combo ramp/reset and star recording).
 - Build release: `flutter build apk --release` / `flutter build appbundle` (Android signing via `android/key.properties`, must exist locally; release build type uses `signingConfigs.release`).
 
 ### Assets
@@ -120,8 +120,8 @@ lib/
 │   ├── game_size.dart         GameSize singleton: 20×30 grid math, cell size, margins
 │   ├── app_color.dart         AppColorController (ChangeNotifier, persists theme index)
 │   ├── sound_controller.dart  GameSound (ChangeNotifier, static players, persists toggles)
-│   ├── level_controller.dart  LevelController: per-level unlock/highscore + custom level save/restore
-│   ├── timer_controller.dart  GameTimer: 1s-tick elapsed play timer (HH:MM:SS text)
+│   ├── level_controller.dart  LevelController: per-level unlock/highscore/stars/best-time + custom level save/restore
+│   ├── timer_controller.dart  GameTimer: 1s-tick elapsed play timer (HH:MM:SS text, `elapsedSeconds()`)
 │   ├── special_food.dart      SpecialFood random-reward engine + CreateGiftFoodIndex
 │   └── cell/ …                (widget, see below)
 ├── providers/
@@ -142,7 +142,7 @@ lib/
 `LevelModel` (`model/level_model.dart`): `rank` (int?), `targetScore`, `highScore`, `blocks` (List<int> cell indices), `enable`.
 `levelList` (global, 32 items):
 - `levelList[0]` → **Survival** (rank 0): no obstacles, no target (free play).
-- `levelList[1..30]` → ranks 1–30, targets 300→800, each uses `IndexLevel*` block layout. Unlocked by completing the previous level.
+- `levelList[1..30]` → ranks 1–30, targets `310 + 10·(rank-1)` (310→600), each uses `IndexLevel*` block layout. Unlocked by completing the previous level. `LevelModel.speed` getter scales the base tick `300ms → 180ms` linearly over ranks 1–30 (`300 - (rank-1)*120~/29`); `LevelModel.targetTime` derives a par time from the target (`targetScore * 3 ~/ 10`).
 - `levelList[31]` → **customize** (rank 999): user-built level restored from storage at runtime.
 
 ---
@@ -165,9 +165,9 @@ lib/
 - `widget/play_screen_widget/play_board.dart` — `PlayBoard` + `BoardPainter` (CustomPainter): builds `ListenableBuilder` from `StagePlay` grid, anchors body path to interpolated head position (`_headCenter`), breaks stroke at non-adjacent cells and wrap seams (no torus-wrap adjacency). No tail fade (removed).
 - `widget/cell/cell.dart` — builds a board cell for a `CellType`: blocks (neon dots on dark), snake segments (rounded bars), snake **head** (with eyes, oriented by direction), snake **corners**, food (neon), special food (neon with `?` icon). Uses `CellProp` + `RotatedBox(quarterTurns)` + `AnimatedContainer`. **Since 2026-09-11 colors come from the active `AppColor` palette** (`snakeColor`, `foodColor`, `blockColor`, `glowColor`); the 5 neon themes now drive the playfield, not just chrome. `cell.dart`, `snake_eye.dart`, `snake_corner.dart` are also used by the level editor (`design_level.dart`).
 - `widget/game_menu.dart` — the pause/game-over overlay: `BackdropFilter` blur scrim, slide-up neon panel, `Orbitron` glowing title, count-up score (via `AnimatedNumber`). Buttons: Continue (rewarded video for extra life), Resume/Restart, Option, Back To Main, Exit. Renders `AskToMoveNextLevel` when `showAskMenu`.
-- `widget/ask_to_move_next_level.dart` — congratulation dialog (clean neon copy) to proceed to next level or keep playing current.
+- `widget/ask_to_move_next_level.dart` — congratulation dialog: 3-star results panel (filled/empty stars, `2 / 3` count, TIME/PAR/BEST rows via `StagePlay.formatTime`, short flavor line) plus the two existing buttons (next level / keep playing). Hidden for rank 30 (no next level).
 - `widget/option_menu.dart` — AlertDialog (glow-bordered): sound toggle, music toggle, color-theme dropdown (5 neon themes), Read Privacy Policy link (Google Sites URL).
-- `widget/play_screen_widget/top_section.dart` — neon HUD panel: ad banner, LEVEL chip, `TimerLine` (play time + reward countdown + settings button), `ScoreLine` (TARGET/SCORE/HIGH badge chips with `AnimatedNumber` count-up). Settings button toggles pause + opens menu.
+- `widget/play_screen_widget/top_section.dart` — neon HUD panel: ad banner, LEVEL chip, `TimerLine` (play time + reward countdown + settings button), `_ProgressStrip` (real levels only: live current-star count, live `★3/★2 in m:ss` pace countdown to losing the current rating via `StagePlay.paceLabel`, live `COMBO ×N` mini-chips; hidden on Survival), `ScoreLine` (TARGET/SCORE/HIGH badge chips with `AnimatedNumber` count-up). Settings button toggles pause + opens menu.
 - `widget/play_screen_widget/tap_to_play.dart` — full-screen "Tap to Play" overlay; first tap starts the game+clock.
 - `widget/neon_pressable.dart` — shared press feedback wrapper (scale-down + glow) used by `GAFButton`, `MainMenuButton`, `GAFRaisedButton`.
 - `widget/play_screen_widget/game_effects.dart` — particle burst + floating score/reward label overlay, keyed off `StagePlay.fxPulse`.
@@ -175,7 +175,7 @@ lib/
 - `widget/play_screen_widget/neon_grid.dart` — `NeonGridPainter`, faint grid lines behind the playfield.
 - `helper/swipe.dart` — pure `resolveSwipe()` steering resolver (drag threshold + 180° reversal guard), unit-tested in `test/swipe_test.dart`.
 - `widget/play_screen_widget/d_pad.dart` — optional on-screen D-pad (4 semi-transparent neon buttons), feeds `StagePlay.changeDirect()`, widget-tested in `test/d_pad_test.dart`.
-- `widget/stage_icon.dart` — level tile in the grid; reads unlock state (`LevelController(stageId-1).getLevelState()`), Survival always enabled, locked tiles dimmed.
+- `widget/stage_icon.dart` — level tile in the grid; reads `(open, stars)` via `LevelController(stageId-1)` records, Survival always enabled and untrusted, locked tiles dimmed, completed tiles show 3 neon star icons (filled with `glowColor`) plus a `PAR m:ss` line under the stars.
 - `widget/main_menu_button.dart`, `gaf_button.dart`, `gaf_item.dart`, `gaf_text.dart`, `gaf_back_button.dart`, `gaf_rasid_button.dart`, `gaf_change_value_button.dart`, `gaf_dialog.dart`, `converted_icon.dart` (animated toggle icon), `snake_corner.dart`, `snake_eye.dart`, `stage_icon.dart`.
 
 > Note: `widget/gaf_dialog.dart`'s `GafButtonDialog` has a broken button: `onPressed: () => onPressed` (passes a function returning a function). It appears unused. `GAFActionButton` in `gaf_package` is the working equivalent.
@@ -210,14 +210,16 @@ lib/
 - `StagePlay.start()` refactored: normal levels read `levelList[levelID]` directly; custom level (`levelID == levelList.length-1`) branches to `_setupCustomLevel()` (async) which calls `LevelController(999).levelRestore()` then builds a fresh `LevelModel` from the saved data and `LevelController.customBlocks` — the global `levelList` is never mutated.
 
 ### Main loop (`providers/stagePlay.dart`)
-- `StagePlay.gamePlay()` starts `Timer.periodic(Duration(milliseconds: Manager.gameSpeed))` (default 300ms = `KDefaultGameSpeed`).
+- `StagePlay.gamePlay()` starts `Timer.periodic(Duration(milliseconds: Manager.gameSpeed))`. Base tick = `Manager.levelBaseSpeed` = the level's `LevelModel.speed` (300ms at rank 1 → 180ms at rank 30), set on each `_beginLevel`; transient speed-reward effects restore to `levelBaseSpeed`, not the fixed default.
 - Each tick (if not over/paused/speed-change): `snake.moving()` → `_isaLife()` (death check; grants one "Continue" via rewarded ad) → `_eating()` → `checkAvailabilityForSpecialFood()` → `notifyListeners()`.
 - Eating:
-  - Normal food → +`KEatScoreValue` (10), new food spawned, score/target/high-score checked.
-  - Gift food → removed from `Manager.giftFoods`, +10.
+  - Normal food → combo score, new food spawned, score/target/high-score checked.
+  - Gift food → removed from `Manager.giftFoods`, combo score.
   - Special food (`sFood`) → `Stage.eatingSFood()`: applies a random reward via `SpecialFood()`, starts reward countdown.
+- **Combo (Phase 1)**: each normal/gift food eat bumps `_combo` (1→4); within a 2s window the gain ramps `10 → 12 → 15 → 20` (`StagePlay._comboGains`, exposed as `fxScore` and shown in the `GameEffects` "+N" label); 2s idle or level start/end resets to 10.
 - Speed changes are handled by cancelling the timer and re-calling `gamePlay()` with the new duration.
-- Target reached (score ≥ `level.targetScore`) → `LevelController.setLevelState()` unlocks the next level, plays `snaketargetdone.mp3`, and once (unless already asked) opens the "move to next level" prompt (`showAskMenu`), pausing the game. Survival (rank 0) and Custom (rank 999) skip this.
+- Target reached (score ≥ `level.targetScore`) → `LevelController.setLevelState()` unlocks the next level, records stars + best time via `LevelController.set/…` (see Persistence), plays `snaketargetdone.mp3`, and once (unless already asked) opens the "move to next level" prompt (`showAskMenu`), pausing the game. Survival (rank 0) and Custom (rank 999) skip this.
+- **Stars (Phase 1)**: `StagePlay.starsFor(elapsed, parTime)` → 3 stars if `elapsed ≤ par~/2`, 2 if `≤ par`, else 1; recorded only when the in-game elapsed clock is running (`GameTimer.elapsedSeconds() > 0`) and only for real levels (rank not 0/999).
 - High score → persisted via `LevelController.setLevelHighScore` **only on a strict beat** (`>`, a tie does nothing); on the first beat `snakehieghscorebreak.mp3` plays **and** a new celebration FX fires (`StagePlay.fxHScorePulse` bumps, `GameEffects` draws a big double-ring burst + rising "NEW HIGH SCORE" Orbitron text + whole-board glow tint, and the HIGH HUD chip flashes foodColor via a one-shot `TweenAnimationBuilder`).
 - Death: `Manager.requestLife` set; if extra life already taken (`isExtraLifeTaken`) → game over. Otherwise pause + overlay "Continue" button → rewarded ad (watch → `giveExtraLife()` = IMMORTAL for 30s).
 
@@ -230,12 +232,12 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 | 2 | Game Over | insta-death |
 | 3–6 | Score Plus (10–209) | `+N` |
 | 7–9 | Score Minus (−10..−209) | `−N` (score clamped ≥ 0) |
-| 10–12 | More Food | spawns 10–29 gift foods (may overlap blocks — block check commented out) |
-| 13–16 | Increase Speed | speed −(40..89)ms |
+| 10–12 | More Food | spawns 10–29 gift foods (block-overlap check **enabled** since 2026-09-14 — gift cells never land on `Manager.blocks`) |
+| 13–16 | Increase Speed | speed −(40..89)ms from current `levelBaseSpeed` |
 | 17–20 | Decrease Speed | speed +(40..89)ms |
 | 21–23 | Change Color | snake turns blue (`isMustChangeSnakeColor`) for 15s |
 
-`restReward()` (via `Stage.getRestTime()` 1s Timer) reverts speed/color/gift effects when the countdown ends, restoring `KDefaultGameSpeed`.
+`restReward()` (via `Stage.getRestTime()` 1s Timer) reverts speed/color/gift effects when the countdown ends, restoring `Manager.levelBaseSpeed` (the current level's base tick, not the global default).
 
 ### Timer (separate from game loop)
 `GameTimer` — independent 1s periodic timer for the displayed `HH:MM:SS` play time; starts on first tap, resets on game over.
@@ -252,6 +254,8 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 | `dPadState` | bool | Manager | on-screen D-pad on/off |
 | `stage_state{rank}` | bool | LevelController | level unlocked (rank 0 set true at splash) |
 | `stage_high_score{rank}` | int | LevelController | personal best (>= 0) |
+| `stage_stars{rank}` | int | LevelController | best 1–3 star rating (best-of, never lowered) |
+| `stage_best_time{rank}` | int | LevelController | fastest completion in seconds (best-of, never raised) |
 | `blocks_list{rank}` | String list | LevelController | custom level block indices (rank 999) |
 | `level_target{rank}` | int | LevelController | custom level target (rank 999) |
 | `count_app_run` | int | AppRating | launch counter for rating prompt |
@@ -261,7 +265,7 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 
 ## 9. Known Issues / Technical Debt (verified by code reading)
 
-1. **Widget/game-logic tests** — **FIXED 2026-09-14**. 50 tests now pass: `Snake` (movement/wrap/input-queue/die), `resolveSwipe` (`swipe_test.dart`), `LevelController` (prefs/unlock), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` compare, `StagePlay` (start/score/unlock/decoupling), `GameSound` (pause/resume), and game-loop tick timing via fakeAsync (`loop_test.dart` — tick advancing, eating, pause/gameOver guards, special-food spawn+15s expiry).
+1. **Widget/game-logic tests** — **FIXED 2026-09-14**. **67 tests now pass**: `Snake` (movement/wrap/input-queue/die), `resolveSwipe` (`swipe_test.dart`), `LevelController` (prefs/unlock/stars/best-time), `SpecialFood`/`CreateGiftFoodIndex`, `AppUpdate` compare, `StagePlay` (start/score/unlock/decoupling/currentStars/formatTime), `StageIcon` (overflow + star-ownership + PAR line), `GameSound` (pause/resume), and game-loop tick timing via fakeAsync (`loop_test.dart` — tick advancing, eating, pause/gameOver guards, combo ramp/reset, star recording).
 2. **AppUpdate cast bug** — **FIXED 2026-09-11**. `_getVersion` is now a typed `Uri` (single slash); fetch wrapped in `try/catch` (network error → no dialog, no crash); body cleaning checks `statusCode==200` and strips quotes only when present.
 3. **AppUpdate version compare bug** — **FIXED 2026-09-11**. `haveLastVersion` is a static numeric part-by-part compare (padded for unequal lengths, non-numeric segments ignored) — unit-tested.
 4. **Rewarded ad race (reward leak)** — **FIXED 2026-09-11**. `RewardedHelperAd` now preloads + caches one ad (`ensureLoaded()`, shared `Completer` guard, concurrency safe); `showAd` awaits the load and shows the cached ad; `runReward` can only fire inside `onUserEarnedReward` (i.e. after a real completed ad), and the ad is disposed on dismiss/fail-to-show.
@@ -297,7 +301,8 @@ Appears after a random **60–90s** delay, stays **15s** if uneaten. `getRandomR
 ## 11. Suggested Improvement Order (if asked to work on the project)
 
 > **2026-09-11 repair pass** resolved #2, #3, #4, #8, #11, #13 and added the game-logic test suite (see §9), plus the neon landing/level-editor sweep and the low-end knobs (`KMenuBlurSigma`, `KGlowStrength` in `constant.dart`).
-> **2026-09-14 pass** resolved #1 (loop-tick fakeAsync tests), #9 (level decoupling), #12 (flavor text), #14 (dead loading_screen + position.dart removed) and added the optional D-pad; `fake_async` promoted to `dev_dependencies`.
+> **2026-09-14 pass** resolved #1 (loop-tick fakeAsync tests), #9 (level decoupling), #12 (flavor text), #14 (dead loading_screen + position.dart removed) and added the optional D-pad; `fake_async` promoted to `dev_dependencies`. Same-day **Phase 1 game-design pass**: gradual per-level targets (310→600, +10/rank), per-level base speed (300→180ms), 3-star rating with best-of persistence, combo multiplier (2s window, 10/12/15/20), gift-food block-overlap fix, and star icons on level tiles — suite at 63 tests.
+> **Phase 2 progression-feedback pass (same day)**: level-complete dialog now shows the earned star panel (`2 / 3` count under the stars) plus TIME/PAR/BEST rows; play HUD gained a `_ProgressStrip` (current ★, `PAR m:ss`, live `COMBO ×N` — real levels only, hidden on Survival; the PAR chip is a **live pace countdown** `★3 in 0:46 → ★2 in 0:47 → ★1` synced to `currentStars`); special-food speed rewards now offset from `Manager.levelBaseSpeed` (root-cause of the speed-reward regression); level tiles show a `PAR m:ss` line under the stars; combo reset window raised to **4s** (`KComboResetSeconds`). Suite at **68 tests**.
 
 Remaining / next candidates:
 
@@ -307,6 +312,8 @@ Remaining / next candidates:
 4. ~~Remove dead `loading_screen.dart`~~ — **DONE 2026-09-14**.
 5. ~~Flavor-text cleanup~~ — **DONE 2026-09-14** (emoji removed, apostrophe/punctuation fixed).
 6. ~~On-screen D-pad~~ — **DONE 2026-09-14** (optional, toggle in Option dialog, persisted `dPadState`). Landing/editor art pass still only if demanded.
+
+> **Phase 3 quick wins (2026-09-14, same day)**: stages header gained an aggregate star chip — `★ N / 90` (a live `FutureBuilder` on `Manager.refreshTotalStars()`, summing `LevelController(rank).getLevelStars()` for ranks 1–30, max 90) sitting beside the 'Levels' title; Survival's special-food **Game Over** gift is now **Survival-only** — on real levels (rank ≠ 0) the instant-death slot falls through to the score reward (`special_food._gameOver()` gates on `Manager.currentStageID != 0`), so no gift can end a working level run abruptly. Suite at **68 tests**.
 
 ---
 

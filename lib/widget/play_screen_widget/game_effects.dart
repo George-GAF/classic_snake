@@ -66,7 +66,7 @@ class _GameEffectsState extends State<GameEffects>
     final color = celebrate ? colors.glowColor : (stage.fxIsSpecial ? colors.glowColor : colors.foodColor);
     final text = celebrate
         ? 'NEW HIGH SCORE'
-        : (stage.fxIsSpecial ? (stage.stage?.reward ?? '') : '+10');
+        : (stage.fxIsSpecial ? (stage.stage?.reward ?? '') : '+${stage.fxScore}');
     final label = TextPainter(
       text: TextSpan(
         text: text,

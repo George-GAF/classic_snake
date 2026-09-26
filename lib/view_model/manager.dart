@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constant/game_values.dart';
 import '../widget/option_menu.dart';
-import 'game_size.dart';
+import '../view_model/game_size.dart';
+import 'level_controller.dart';
 
 class Manager {
   static bool gameRun = false;
@@ -26,8 +27,10 @@ class Manager {
   static const String _dPadStateKey = 'dPadState';
 
   static int currentStageID = 0;
+  static int totalStars = 0;
   static int gameScore = 0;
   static int seconds = 0;
+  static int levelBaseSpeed = KDefaultGameSpeed;
   static List<int> giftFoods = [];
   static List<int> snake = [];
   static List<int> blocks = [];
@@ -44,6 +47,7 @@ class Manager {
     isSFoodEating = false;
     gameScore = 0;
     gameSpeed = KDefaultGameSpeed;
+    levelBaseSpeed = KDefaultGameSpeed;
   }
 
   static void endGame() {
@@ -76,6 +80,18 @@ class Manager {
     dPadEnabled = !dPadEnabled;
     SharedPreferences pref = await SharedPreferences.getInstance();
     await pref.setBool(_dPadStateKey, dPadEnabled);
+  }
+
+  static const int rankCount = 30;
+  static const int maxStars = rankCount * 3;
+
+  static Future<int> refreshTotalStars() async {
+    int sum = 0;
+    for (int rank = 1; rank <= rankCount; rank++) {
+      sum += await LevelController(rank).getLevelStars();
+    }
+    totalStars = sum;
+    return totalStars;
   }
 
   static void screenAdjust() {

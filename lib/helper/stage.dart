@@ -47,8 +47,8 @@ class Stage {
     Manager.food = food;
   }
 
-  void addScore() {
-    Manager.gameScore += KEatScoreValue;
+  void addScore(int gained) {
+    Manager.gameScore += gained;
   }
 
   void eatingGiftFood(int giftFood) {
