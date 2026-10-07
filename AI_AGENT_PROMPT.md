@@ -14,9 +14,10 @@
 
 | Field | Value |
 |---|---|
-| App name | Snake Classic (label in AndroidManifest) |
-| Package / applicationId | `com.gaf.classic_snake` |
-| Version | `3.0.0+7` in `pubspec.yaml`; `KCurrentAppVersion = '3.0.1'` in `lib/constant/constant.dart:9` |
+| App name | Cyber Crawl Snake (label in AndroidManifest) |
+| Package / applicationId | `com.gaf.CYBER_CRAWL_Snake` |
+| Version | `1.0.0+1` in `pubspec.yaml`; `KCurrentAppVersion = '1.0.0'` in `lib/constant/constant.dart:9` |
+| Branch note | On `OPVersion` this repo builds **Cyber Crawl Snake** (new Play app). `master` still builds the original `com.gaf.classic_snake` / "Snake Classic". AdMob IDs and the Firebase version.json node (`cyber-crawl-version.json`) are placeholders — see TODOs in `AndroidManifest.xml`, `ad_manager.dart`, `app-update.dart`. |
 | Type | Flutter mobile game (portrait-only, fullscreen) |
 | Primary target | Android (Google Play) — AdMob configured for Android only |
 | Author credit | "Made By GAF-Programing 2023" (shown in menu) |
@@ -184,7 +185,7 @@ lib/
 - `gaf_service/ad_manager.dart` — AdMob **Ad unit IDs for Android** (`ca-app-pub-...`). Banner + rewarded IDs. `initAdMob()` is effectively a no-op stub.
 - `gaf_service/app-update.dart` — fetches `version.json` from Firebase RTDB, parses MAJOR.MINOR.PATCH, compares against `KCurrentAppVersion`, shows `UpdateAppDialog` if outdated. **See Known Issues (broken `as Uri` cast + naive comparison).**
 - `gaf_service/app-rating.dart` — after 20 launches (SharedPreferences counter) and not yet rated → `AppRatingDialog` → opens Play Store page. Sets `is_rate_done`.
-- `gaf_service/open_google_play.dart` — launches `https://play.google.com/store/apps/details?id=com.gaf.classic_snake`.
+- `gaf_service/open_google_play.dart` — launches `https://play.google.com/store/apps/details?id=com.gaf.CYBER_CRAWL_Snake`.
 - `gaf_widget/gaf_dialog.dart` — themed AlertDialog wrapper (title + divider + content + actions).
 - `gaf_widget/gaf_dialog_action_button.dart` — "action + Cancel" row for dialogs.
 - `gaf_widget/app_rating_dialog.dart`, `gaf_widget/app-update-Dialog.dart` — concrete dialogs built on the above.

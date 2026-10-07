@@ -43,7 +43,7 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
-    namespace = "com.gaf.classic_snake"
+    namespace = "com.gaf.CYBER_CRAWL_Snake"
     //compileSdkVersion 34
     compileSdk = 36//flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
@@ -60,7 +60,7 @@ android {
     }
 */
     defaultConfig {
-        applicationId "com.gaf.classic_snake"
+        applicationId "com.gaf.CYBER_CRAWL_Snake"
        /* minSdkVersion 33
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()

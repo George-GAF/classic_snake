@@ -1,15 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gaf.classic_snake">
+    package="com.gaf.CYBER_CRAWL_Snake">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
    <application
-        android:label="Snake Classic"
+        android:label="Cyber Crawl Snake"
         android:icon="@mipmap/ic_launcher"
        android:enableOnBackInvokedCallback="true"
        >
+       <!-- TODO: replace with the real AdMob app ID for com.gaf.CYBER_CRAWL_Snake (currently Google's sample app ID = test ads) -->
        <meta-data
            android:name="com.google.android.gms.ads.APPLICATION_ID"
-           android:value="ca-app-pub-3877304040688947~1469806211"/>
+           android:value="ca-app-pub-3940256099942544~3347511713"/>
 
         <activity
             android:name=".MainActivity"

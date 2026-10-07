@@ -7,8 +7,9 @@ import '../gaf_widget/app-update-Dialog.dart';
 import 'open_google_play.dart';
 
 class AppUpdate {
+  // TODO: create this node in Firebase for Cyber Crawl Snake (404 = check silently skipped)
   static final Uri _getVersion = Uri.parse(
-      'https://classic-snake-3ecd5-default-rtdb.firebaseio.com/version.json');
+      'https://classic-snake-3ecd5-default-rtdb.firebaseio.com/cyber-crawl-version.json');
 
   AppUpdate(BuildContext context) {
     _handleUpdate(context);

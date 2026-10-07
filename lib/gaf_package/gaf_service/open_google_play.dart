@@ -1,7 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 
 class OpenGooglePlay {
-  static const _appLink = '/details?id=com.gaf.classic_snake';
+  static const _appLink = '/details?id=com.gaf.CYBER_CRAWL_Snake';
 
   void openGooglePlay() async {
     Uri uri = Uri(

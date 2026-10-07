@@ -1,4 +1,4 @@
-package com.gaf.classic_snake
+package com.gaf.CYBER_CRAWL_Snake
 
 import io.flutter.embedding.android.FlutterActivity
 

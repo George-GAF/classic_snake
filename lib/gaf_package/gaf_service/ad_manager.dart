@@ -1,9 +1,11 @@
 class AdManager {
+  // TODO: replace with the real AdMob ad units for com.gaf.CYBER_CRAWL_Snake
+  // (currently Google's sample units = test ads)
   static const String bannerAdUnitIdAndroid =
-      'ca-app-pub-3877304040688947/7763210458';
+      'ca-app-pub-3940256099942544/6300978111';
 
   static const String rewardedAdUnitIdAndroid =
-      'ca-app-pub-3877304040688947/9920616656';
+      'ca-app-pub-3940256099942544/1033173712';
 
   static bool _adRun = false;
 
